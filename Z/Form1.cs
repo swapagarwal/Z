@@ -1,12 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Diagnostics;
+using System.Timers;
 using System.Windows.Forms;
+using System.Management;
 
 namespace Z
 {
@@ -15,6 +11,18 @@ namespace Z
         public Form1()
         {
             InitializeComponent();
+            
+            int Interval = 5 * 60 * 1000;
+
+            System.Timers.Timer ProcessTimer = new System.Timers.Timer();
+            ProcessTimer.Elapsed += new ElapsedEventHandler(ProcessData);
+            ProcessTimer.Interval = Interval;
+            ProcessTimer.Start();
+        }
+
+        private void ProcessData(object source, ElapsedEventArgs e)
+        {
+            LearningTools.ProcessVolume();
         }
 
         private void SetVolume(int level)
@@ -74,6 +82,11 @@ namespace Z
             {
                 SetVolume(50);
             }
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            // AlwaysRunning();
         }
     }
 }

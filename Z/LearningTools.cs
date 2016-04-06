@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using NAudio.CoreAudioApi;
 
 namespace Z
@@ -67,6 +63,11 @@ namespace Z
                     }
                 }
             }
+        }
+
+        public static void ProcessVolume()
+        {
+
         }
     }
 }

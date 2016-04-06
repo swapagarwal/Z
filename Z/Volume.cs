@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using NAudio;
 using Newtonsoft.Json;
 using System.IO;
 
@@ -26,6 +23,7 @@ namespace Z
     class VolumeHistory
     {
         public SortedSet<VolumeData> VolumeDataSet = new SortedSet<VolumeData>(Comparer<VolumeData>.Create((x, y) => y.TimeStamp.CompareTo(x.TimeStamp)));
+        VolumeData LastUsedVolumeData;
         string FileName = "volume_data.dat";
 
         public VolumeHistory()
@@ -56,6 +54,8 @@ namespace Z
             {
                 VolumeDataSet.Add(Item);
             }
+
+            LastUsedVolumeData = VolumeDataSet.Min;
         }
     }
 }
