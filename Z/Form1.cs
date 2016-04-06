@@ -15,6 +15,8 @@ namespace Z
         public Form1()
         {
             InitializeComponent();
+            LearningTools a = new LearningTools();
+            textBox2.Text = a.GetVolumeSnapshot().ToString();
         }
 
         private void SetVolume(int level)
@@ -23,8 +25,10 @@ namespace Z
             {
                 //Instantiate an Enumerator to find audio devices
                 NAudio.CoreAudioApi.MMDeviceEnumerator MMDE = new NAudio.CoreAudioApi.MMDeviceEnumerator();
+
                 //Get all the devices, no matter what condition or status
                 NAudio.CoreAudioApi.MMDeviceCollection DevCol = MMDE.EnumerateAudioEndPoints(NAudio.CoreAudioApi.DataFlow.All, NAudio.CoreAudioApi.DeviceState.All);
+                
                 //Loop through all devices
                 foreach (NAudio.CoreAudioApi.MMDevice dev in DevCol)
                 {
