@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Management;
 
 namespace Z
 {
@@ -73,6 +74,40 @@ namespace Z
             catch
             {
                 SetVolume(50);
+            }
+            Brightness();
+            //SetBrightness(100);
+        }
+        public void Brightness()
+        {
+            string NamespacePath = "\\\\.\\ROOT\\WMI";
+            string ClassName = "WmiMonitorBrightnessEvent";
+
+            ManagementClass mClass = new ManagementClass(NamespacePath + ":" + ClassName);
+            PropertyDataCollection lproperties = mClass.Properties;
+            Console.WriteLine(string.Format("Property Names in {0}: ", ClassName));
+            foreach (PropertyData property in lproperties)
+            {
+                Console.WriteLine("name: {0}, Origin: {1}", property.Name, property.Value);
+                //string brightness_Value = property.ToString();
+                //Console.WriteLine();
+            }
+        }
+        static void SetBrightness(byte targetBrightness)
+        {
+            ManagementScope scope = new ManagementScope("root\\WMI");
+            SelectQuery query = new SelectQuery("WmiMonitorBrightnessMethods");
+            using (ManagementObjectSearcher searcher = new ManagementObjectSearcher(scope, query))
+            {
+                using (ManagementObjectCollection objectCollection = searcher.Get())
+                {
+                    foreach (ManagementObject mObj in objectCollection)
+                    {
+                        mObj.InvokeMethod("WmiSetBrightness",
+                            new Object[] { UInt32.MaxValue, targetBrightness });
+                        break;
+                    }
+                }
             }
         }
     }
