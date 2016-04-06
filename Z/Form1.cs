@@ -15,8 +15,6 @@ namespace Z
         public Form1()
         {
             InitializeComponent();
-            LearningTools a = new LearningTools();
-            textBox2.Text = a.GetVolumeSnapshot().ToString();
         }
 
         private void SetVolume(int level)
