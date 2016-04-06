@@ -11,15 +11,16 @@ namespace Z
 {
     class LearningTools
     {
-        public VolumePointData GetVolumeSnapshot()
+        public VolumeData GetVolumeSnapshot()
         {
-            VolumePointData Data = new VolumePointData();
+            VolumeData Data = new VolumeData();
 
             NAudio.CoreAudioApi.MMDeviceEnumerator MMDE = new NAudio.CoreAudioApi.MMDeviceEnumerator();
             NAudio.CoreAudioApi.MMDevice DefaultDevice = MMDE.GetDefaultAudioEndpoint(NAudio.CoreAudioApi.DataFlow.Render, NAudio.CoreAudioApi.Role.Multimedia);
 
             Data.DeviceName = DefaultDevice.FriendlyName;
             Data.MasterVolume = DefaultDevice.AudioEndpointVolume.MasterVolumeLevelScalar;
+            Data.TimeStamp = DateTime.Now;
 
             if (DefaultDevice.AudioMeterInformation.MasterPeakValue > 0)
             {

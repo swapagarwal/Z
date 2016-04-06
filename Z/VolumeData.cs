@@ -13,10 +13,11 @@ namespace Z
         public float Volume;
     }
 
-    class VolumePointData
+    class VolumeData
     {
-        public string DeviceName; 
+        public DateTime TimeStamp;
+        public string DeviceName;
         public float MasterVolume;
-        public List<ApplicationVolume> Applications = new List<ApplicationVolume>(); 
+        public List<ApplicationVolume> Applications = new List<ApplicationVolume>();
     }
 }
