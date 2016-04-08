@@ -8,9 +8,9 @@ namespace Z
     {
         private static VolumeModel VolumeData = new VolumeModel();
         
-        public static Volume GetVolumeSnapshot()
+        public static VolumeInstance GetVolumeSnapshot()
         {
-            Volume Data = new Volume();
+            VolumeInstance Data = new VolumeInstance();
 
             MMDeviceEnumerator MMDE = new MMDeviceEnumerator();
             MMDevice DefaultDevice = MMDE.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia);
@@ -39,7 +39,7 @@ namespace Z
             return Data;
         }
 
-        public static void SetVolume(Volume Data)
+        public static void SetVolume(VolumeInstance Data)
         {
             MMDeviceEnumerator MMDE = new MMDeviceEnumerator();
             MMDevice DefaultDevice = MMDE.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia);
@@ -69,7 +69,7 @@ namespace Z
 
         public static void ProcessVolume(bool AutomaticVolumeMode)
         {
-            Volume VolumeSnapshot = GetVolumeSnapshot();
+            VolumeInstance VolumeSnapshot = GetVolumeSnapshot();
 
             if (AutomaticVolumeMode)
             {

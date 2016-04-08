@@ -4,9 +4,12 @@ using System.Linq;
 using Newtonsoft.Json;
 using System.IO;
 using System.Diagnostics;
+using System.Runtime.Serialization.Formatters;
+using System.Runtime.Serialization.Formatters.Binary;
 
 namespace Z
 {
+    [Serializable()]
     class ApplicationVolume
     {
         public string ApplicationName;
@@ -28,14 +31,29 @@ namespace Z
         }
     }
 
-    class Volume
+    [Serializable()]
+    class VolumeInstance
     {
         public DateTime TimeStamp = DateTime.MinValue;
         public string DeviceName;
         public float MasterVolume;
         public HashSet<ApplicationVolume> Applications = new HashSet<ApplicationVolume>();
         
-        public bool ExactlySame(Volume x)
+        public string GetApplicationString()
+        {
+            string ApplicationString = "";
+
+            List<ApplicationVolume> AppList = Applications.OrderBy(o => o.ApplicationName).ToList();
+
+            foreach (ApplicationVolume App in AppList)
+            {
+                ApplicationString += App.ApplicationName + ", ";
+            }
+
+            return ApplicationString;
+        }
+
+        public bool ExactlySame(VolumeInstance x)
         {
             if (x == null)
             {
@@ -49,8 +67,8 @@ namespace Z
                     return false;
                 }
 
-                List<ApplicationVolume> a = Applications.ToList();
-                List<ApplicationVolume> b = x.Applications.ToList();
+                List<ApplicationVolume> a = Applications.OrderBy(o=>o.ApplicationName).ToList();
+                List<ApplicationVolume> b = x.Applications.OrderBy(o => o.ApplicationName).ToList();
 
                 for (int i = 0; i < a.Count; i++)
                 {
@@ -67,64 +85,26 @@ namespace Z
         }
     }
 
-    class VolumeModel
+    [Serializable()]
+    class VolumeInstances
     {
-        private SortedSet<Volume> VolumeDataSet = new SortedSet<Volume>(Comparer<Volume>.Create((x, y) => y.TimeStamp.CompareTo(x.TimeStamp)));
-        private Volume LastUsedVolumeData = new Volume();
-        bool Dirty = false;
-        string FileName = Environment.ExpandEnvironmentVariables("%USERPROFILE%\\volume_data.dat");
+        private List<VolumeInstance> VolumeInstanceList = new List<VolumeInstance>();
+        private bool Dirty = false;
+        private VolumeInstance LastUsedVolumeData = new VolumeInstance();
 
-        public VolumeModel()
-        {
-            if (File.Exists(FileName))
-            {
-                ReadFromFile();
-            }
-            else
-            {
-                File.Create(FileName).Close();
-            }
-        }
-
-        public void WriteToFile()
-        {
-            List<Volume> VolumeDataList = VolumeDataSet.ToList();
-            string text = JsonConvert.SerializeObject(VolumeDataList);
-            File.WriteAllText(FileName, text);
-
-            Debug.WriteLine(text);
-        }
-
-        public void ReadFromFile()
-        {
-            string text = File.ReadAllText(FileName);
-            List<Volume> VolumeDataList = JsonConvert.DeserializeObject<List<Volume>>(text);
-
-            if (VolumeDataList != null)
-            {
-                foreach (Volume Item in VolumeDataList)
-                {
-                    VolumeDataSet.Add(Item);
-                }
-
-                LastUsedVolumeData = VolumeDataSet.Min;
-            }
-        }
-
-        public void AddVolume(Volume Item)
+        public void AddVolume(VolumeInstance Item)
         {
             if (Dirty || !Item.ExactlySame(LastUsedVolumeData))
             {
                 Dirty = false;
-                VolumeDataSet.Add(Item);
+                VolumeInstanceList.Add(Item);
                 LastUsedVolumeData = Item;
-                WriteToFile();
             }
         }
 
-        public Volume GetVolume(Volume Item)
+        public VolumeInstance GetVolume(VolumeInstance Item)
         {
-            Volume Data = new Volume();
+            VolumeInstance Data = new VolumeInstance();
 
             /*
             * Complete this
@@ -132,6 +112,73 @@ namespace Z
             */
 
             Dirty = true;
+            return Data;
+        }
+    }
+
+    class VolumeModel
+    {
+        private Dictionary<string, VolumeInstances> VolumeHistory = new Dictionary<string, VolumeInstances>();        
+        public string FileName = Environment.ExpandEnvironmentVariables("%USERPROFILE%\\volume_data.dat");
+
+        public VolumeModel()
+        {
+            ReadFromFile();
+        }
+
+        public void WriteToFile()
+        {
+            Stream FileStream = File.Open(FileName, FileMode.Truncate);
+            BinaryFormatter Serializer = new BinaryFormatter();
+            Serializer.Serialize(FileStream, VolumeHistory);
+            FileStream.Close();
+        }
+
+        public void ReadFromFile()
+        {
+            Stream FileStream = File.Open(FileName, FileMode.OpenOrCreate);
+            try
+            {
+                
+                BinaryFormatter Serializer = new BinaryFormatter();
+                VolumeHistory = Serializer.Deserialize(FileStream) as Dictionary<string, VolumeInstances>;
+                FileStream.Close();
+            }
+            catch (Exception ex)
+            {
+                VolumeHistory = new Dictionary<string, VolumeInstances>();
+                FileStream.Close();
+            }
+        }
+
+        private string GetKey(VolumeInstance Item)
+        {
+            string Key = "";
+
+            Key += Item.DeviceName + ", ";
+            Key += Item.GetApplicationString();
+
+            return Key;
+        }
+
+        public void AddVolume(VolumeInstance Item)
+        {
+            string Key = GetKey(Item);
+
+            if(!VolumeHistory.ContainsKey(Key))
+            {
+                VolumeHistory.Add(Key, new VolumeInstances());
+            }
+
+            VolumeHistory[Key].AddVolume(Item);
+            WriteToFile();
+        }
+
+        public VolumeInstance GetVolume(VolumeInstance Item)
+        {
+            string Key = GetKey(Item);
+            VolumeInstance Data = VolumeHistory[Key].GetVolume(Item);
+            WriteToFile();
             return Data;
         }
     }
