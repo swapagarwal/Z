@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Newtonsoft.Json;
 using System.IO;
-using System.Diagnostics;
-using System.Runtime.Serialization.Formatters;
 using System.Runtime.Serialization.Formatters.Binary;
 
 namespace Z
@@ -13,7 +10,7 @@ namespace Z
     class ApplicationVolume
     {
         public string ApplicationName;
-        public float Volume;
+        public double Volume;
 
         public bool ExactlySame(ApplicationVolume x)
         {
@@ -36,8 +33,9 @@ namespace Z
     {
         public DateTime TimeStamp = DateTime.MinValue;
         public string DeviceName;
-        public float MasterVolume;
-        public HashSet<ApplicationVolume> Applications = new HashSet<ApplicationVolume>();
+        public double MasterVolume;
+        public double Weight = 1.0;
+        public List<ApplicationVolume> Applications = new List<ApplicationVolume>();
         
         public string GetApplicationString()
         {
@@ -89,29 +87,135 @@ namespace Z
     class VolumeInstances
     {
         private List<VolumeInstance> VolumeInstanceList = new List<VolumeInstance>();
-        private bool Dirty = false;
-        private VolumeInstance LastUsedVolumeData = new VolumeInstance();
+        // private VolumeInstance LastUsedVolumeData = new VolumeInstance();
+        private DateTime LastCalculatedVolumeData = DateTime.MinValue;
+        private static int Threshold;
 
+        private void ReinforcedLearning(VolumeInstance Item)
+        {
+            List<double> Factors = new List<double>();
+
+            foreach(VolumeInstance Instance in VolumeInstanceList)
+            {
+                double val = Math.Abs(Instance.TimeStamp.TimeOfDay.Subtract(Item.TimeStamp.TimeOfDay).TotalSeconds);
+                Factors.Add(Math.Pow(Math.Max(1, Math.Min(val, 86400 - val)), 2));
+            }
+
+            double ratio = 144.0 / Factors.Max();
+            Factors = Factors.Select(x => Math.Exp(-x * ratio)).ToList();
+
+            double MaxWeight = 0;
+            int i = 0;
+            foreach (VolumeInstance Instance in VolumeInstanceList)
+            {
+                Instance.Weight = Instance.Weight - (Math.Abs(Instance.MasterVolume - Item.MasterVolume) * Factors[i]);
+                MaxWeight = Math.Max(MaxWeight, Instance.Weight);
+                i++;
+            }
+
+            if (MaxWeight > 0)
+            {
+                foreach (VolumeInstance Instance in VolumeInstanceList)
+                {
+                    Instance.Weight = Instance.Weight / MaxWeight;
+                }
+            }
+        }
+
+        private List<double> GetTimeOfDayDifferenceWeights(VolumeInstance Item)
+        {
+            List<double> Weights = new List<double>();
+
+            foreach (VolumeInstance Instance in VolumeInstanceList)
+            {
+                double val = Math.Abs(Instance.TimeStamp.TimeOfDay.Subtract(Item.TimeStamp.TimeOfDay).TotalSeconds);
+                Weights.Add(1.0 / (Math.Max(1, Math.Min(val, 86400 - val))));
+            }
+
+            double ratio = 1.0 / Weights.Max();
+            Weights = Weights.Select(x => x * ratio).ToList();
+            return Weights;
+        }
+
+        private List<double> GetTimeDifferenceWeights(VolumeInstance Item)
+        {
+            List<double> Weights = new List<double>();
+
+            foreach (VolumeInstance Instance in VolumeInstanceList)
+            {
+                double val = Math.Abs(Item.TimeStamp.Subtract(Instance.TimeStamp).TotalSeconds);
+                Weights.Add(val);
+            }
+
+            Weights = Weights.Select(x => 1.0/Math.Log(Math.Max(Math.E, x))).ToList();
+            double ratio = 1.0 / Weights.Max();
+            Weights = Weights.Select(x => x * ratio).ToList();
+
+            return Weights;
+        }
+
+        private void RecalculateWeights(VolumeInstance Item)
+        {
+            ReinforcedLearning(Item);
+        }
+        
         public void AddVolume(VolumeInstance Item)
         {
-            if (Dirty || !Item.ExactlySame(LastUsedVolumeData))
+            if (Item.TimeStamp.Subtract(LastCalculatedVolumeData).TotalSeconds < Threshold)
             {
-                Dirty = false;
-                VolumeInstanceList.Add(Item);
-                LastUsedVolumeData = Item;
+                RecalculateWeights(Item);
             }
+            else
+            {
+                VolumeInstanceList.Add(Item);
+            }
+            
+            // LastUsedVolumeData = Item;
+            LastCalculatedVolumeData = DateTime.MinValue;
         }
 
         public VolumeInstance GetVolume(VolumeInstance Item)
         {
             VolumeInstance Data = new VolumeInstance();
+            Data.MasterVolume = 0;
 
-            /*
-            * Complete this
-            *
-            */
+            foreach(ApplicationVolume App in Data.Applications)
+            {
+                Data.Applications.Add(App);
+            }
 
-            Dirty = true;
+            List<double> TimeWeights = GetTimeDifferenceWeights(Item);
+            List<double> TimeOfDayWeights = GetTimeOfDayDifferenceWeights(Item);
+            List<double> NetWeights = new List<double>();
+
+            int i = 0;
+            foreach (VolumeInstance Instance in VolumeInstanceList)
+            {
+                NetWeights.Add(Instance.Weight * TimeWeights[i] * TimeOfDayWeights[i]);
+                i++;
+            }
+
+            double TotalWeight = NetWeights.Sum();
+            NetWeights = NetWeights.Select(x => x / TotalWeight).ToList();
+
+            i = 0;
+            foreach (VolumeInstance Instance in VolumeInstanceList)
+            {
+
+                Data.MasterVolume += Instance.MasterVolume * NetWeights[i];
+
+                int j = 0;
+                foreach(ApplicationVolume App in Instance.Applications)
+                {
+                    App.Volume += Data.Applications[j].Volume * NetWeights[i];
+                    j++;
+                }
+
+                i++;
+            }
+            
+            LastCalculatedVolumeData = DateTime.Now;
+            // LastUsedVolumeData = Data;
             return Data;
         }
     }
@@ -125,7 +229,7 @@ namespace Z
         {
             ReadFromFile();
         }
-
+        
         public void WriteToFile()
         {
             Stream FileStream = File.Open(FileName, FileMode.Truncate);

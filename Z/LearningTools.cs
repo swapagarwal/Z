@@ -45,7 +45,7 @@ namespace Z
             MMDevice DefaultDevice = MMDE.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia);
 
             Debug.Assert(Data.DeviceName == DefaultDevice.FriendlyName);
-            DefaultDevice.AudioEndpointVolume.MasterVolumeLevelScalar = Data.MasterVolume;
+            DefaultDevice.AudioEndpointVolume.MasterVolumeLevelScalar = (float)Data.MasterVolume;
             Data.TimeStamp = DateTime.Now;
 
             Debug.Assert(DefaultDevice.AudioMeterInformation.MasterPeakValue > 0);
@@ -60,7 +60,7 @@ namespace Z
                 {
                     if (ApplicationName == Application.ApplicationName)
                     {
-                        Session.SimpleAudioVolume.Volume = Application.Volume;
+                        Session.SimpleAudioVolume.Volume = (float)Application.Volume;
                         break;
                     }
                 }
