@@ -7,14 +7,12 @@ namespace Z
 {
     public partial class Form1 : Form
     {
-
-
         public Form1()
         {
             InitializeComponent();
 
-            int minutes = 1;
-            int Interval = minutes * 60 * 100;
+            float minutes = 0.1F;
+            int Interval = (int)(minutes * 60 * 1000);
 
             System.Timers.Timer ProcessTimer = new System.Timers.Timer();
             ProcessTimer.Elapsed += new ElapsedEventHandler(ProcessData);

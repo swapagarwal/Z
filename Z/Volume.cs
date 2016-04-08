@@ -19,7 +19,7 @@ namespace Z
                 return false;
             }
 
-            if (ApplicationName == x.ApplicationName || Volume == x.Volume)
+            if (ApplicationName == x.ApplicationName && Volume == x.Volume)
             {
                 return true;
             }

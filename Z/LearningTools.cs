@@ -8,7 +8,6 @@ namespace Z
     {
         private static VolumeModel VolumeData = new VolumeModel();
         
-
         public static Volume GetVolumeSnapshot()
         {
             Volume Data = new Volume();
