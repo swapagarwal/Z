@@ -32,7 +32,7 @@
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.textBox2 = new System.Windows.Forms.TextBox();
             this.volume_mode = new System.Windows.Forms.CheckBox();
-            this.checkBox1 = new System.Windows.Forms.CheckBox();
+            this.brightness_mode = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // button1
@@ -69,22 +69,22 @@
             this.volume_mode.Text = "Automatic Volume";
             this.volume_mode.UseVisualStyleBackColor = true;
             // 
-            // checkBox1
+            // brightness_mode
             // 
-            this.checkBox1.AutoSize = true;
-            this.checkBox1.Location = new System.Drawing.Point(30, 37);
-            this.checkBox1.Name = "checkBox1";
-            this.checkBox1.Size = new System.Drawing.Size(125, 17);
-            this.checkBox1.TabIndex = 4;
-            this.checkBox1.Text = "Automatic Brightness";
-            this.checkBox1.UseVisualStyleBackColor = true;
+            this.brightness_mode.AutoSize = true;
+            this.brightness_mode.Location = new System.Drawing.Point(30, 37);
+            this.brightness_mode.Name = "brightness_mode";
+            this.brightness_mode.Size = new System.Drawing.Size(125, 17);
+            this.brightness_mode.TabIndex = 4;
+            this.brightness_mode.Text = "Automatic Brightness";
+            this.brightness_mode.UseVisualStyleBackColor = true;
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(284, 261);
-            this.Controls.Add(this.checkBox1);
+            this.Controls.Add(this.brightness_mode);
             this.Controls.Add(this.volume_mode);
             this.Controls.Add(this.textBox2);
             this.Controls.Add(this.textBox1);
@@ -103,7 +103,7 @@
         private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.TextBox textBox2;
         private System.Windows.Forms.CheckBox volume_mode;
-        private System.Windows.Forms.CheckBox checkBox1;
+        private System.Windows.Forms.CheckBox brightness_mode;
     }
 }
 

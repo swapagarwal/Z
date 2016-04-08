@@ -4,11 +4,14 @@ using NAudio.CoreAudioApi;
 
 namespace Z
 {
-    class LearningTools
+    static class LearningTools
     {
-        public static VolumeData GetVolumeSnapshot()
+        private static VolumeModel VolumeData = new VolumeModel();
+        
+
+        public static Volume GetVolumeSnapshot()
         {
-            VolumeData Data = new VolumeData();
+            Volume Data = new Volume();
 
             MMDeviceEnumerator MMDE = new MMDeviceEnumerator();
             MMDevice DefaultDevice = MMDE.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia);
@@ -37,7 +40,7 @@ namespace Z
             return Data;
         }
 
-        public static void SetVolume(VolumeData Data)
+        public static void SetVolume(Volume Data)
         {
             MMDeviceEnumerator MMDE = new MMDeviceEnumerator();
             MMDevice DefaultDevice = MMDE.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia);
@@ -65,9 +68,18 @@ namespace Z
             }
         }
 
-        public static void ProcessVolume()
+        public static void ProcessVolume(bool AutomaticVolumeMode)
         {
+            Volume VolumeSnapshot = GetVolumeSnapshot();
 
+            if (AutomaticVolumeMode)
+            {
+                SetVolume(VolumeData.GetVolume(VolumeSnapshot));
+            }
+            else
+            {
+                VolumeData.AddVolume(VolumeSnapshot);
+            }
         }
     }
 }

@@ -2,17 +2,19 @@
 using System.Diagnostics;
 using System.Timers;
 using System.Windows.Forms;
-using System.Management;
 
 namespace Z
 {
     public partial class Form1 : Form
     {
+
+
         public Form1()
         {
             InitializeComponent();
-            
-            int Interval = 5 * 60 * 1000;
+
+            int minutes = 1;
+            int Interval = minutes * 60 * 100;
 
             System.Timers.Timer ProcessTimer = new System.Timers.Timer();
             ProcessTimer.Elapsed += new ElapsedEventHandler(ProcessData);
@@ -22,7 +24,7 @@ namespace Z
 
         private void ProcessData(object source, ElapsedEventArgs e)
         {
-            LearningTools.ProcessVolume();
+            LearningTools.ProcessVolume(volume_mode.Checked);
         }
 
         private void SetVolume(int level)
@@ -75,7 +77,7 @@ namespace Z
         {
             try
             {
-                int vol = Int32.Parse(textBox1.Text);
+                int vol = int.Parse(textBox1.Text);
                 SetVolume(vol);
             }
             catch
@@ -86,7 +88,6 @@ namespace Z
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            // AlwaysRunning();
         }
     }
 }
