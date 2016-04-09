@@ -188,7 +188,11 @@ namespace Z
                 RecalculateWeights(Item);
             }
 
-            LastUserActivity = DateTime.Now;
+            if (!LastUsedVolumeData.ExactlySame(Item))
+            {
+                LastUserActivity = DateTime.Now;
+            }
+            
             LastUsedVolumeData = Item;
             Dirty = false;
         }
