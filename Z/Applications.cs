@@ -44,6 +44,13 @@ namespace Z
 
             return ApplicationList;
         }
+
+        public void StartApplication(string ApplicationName)
+        {
+            Process proc = new Process();
+            proc.StartInfo.FileName = ApplicationPaths[ApplicationName];
+            proc.Start();
+        }
     }
 
     class ApplicationInstance

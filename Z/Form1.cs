@@ -28,21 +28,18 @@ namespace Z
             ProcessTimer.Elapsed += new ElapsedEventHandler(ProcessData);
             ProcessTimer.Interval = Interval;
             ProcessTimer.Start();
-            Button myButton = new Button();
-            myButton.Text = "some text";
-            Button myButton2 = new Button();
-            myButton.Text = "some text2";
+
             // attach event handler for Click event 
             // (assuming ButtonClickHandler is an existing method in the class)
-            dataGridView1.Rows.Add();
-            dataGridView1.Rows.Add();
-            dataGridView1.Rows[0].Cells[0].Value = "haha";
-            dataGridView1.Rows[1].Cells[0].Value = "hoho";
+            
             dataGridView1.DefaultCellStyle.SelectionBackColor = dataGridView1.DefaultCellStyle.BackColor;
             dataGridView1.DefaultCellStyle.SelectionForeColor = dataGridView1.DefaultCellStyle.ForeColor;
-            dataGridView1.ClearSelection();
-            dataGridView1.CurrentCell = null;
-            dataGridView1.Refresh();
+            dataGridView1.CellClick += new DataGridViewCellEventHandler(dataGridView1_CellClick);
+        }
+
+        private void dataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            UserApplications.StartApplication(dataGridView1.Rows[e.RowIndex].Cells[0].Value as string);
         }
 
         private void ProcessData(object source, ElapsedEventArgs e)
@@ -305,12 +302,23 @@ namespace Z
         private void application_searcher_TextChanged(object sender, EventArgs e)
         {
             dataGridView1.Rows.Clear();
-            List<string> Applications = UserApplications.SearchApplications(application_searcher.Text);
 
-            foreach (string ApplicationName in Applications)
+            if (application_searcher.Text == "")
             {
-                dataGridView1.Rows.Add();
-                dataGridView1.Rows[dataGridView1.RowCount-1].Cells[0].Value = ApplicationName;
+                /*
+                * Sort by prediction
+                * 
+                */
+            }
+            else
+            {
+                List<string> Applications = UserApplications.SearchApplications(application_searcher.Text);
+
+                foreach (string ApplicationName in Applications)
+                {
+                    dataGridView1.Rows.Add();
+                    dataGridView1.Rows[dataGridView1.RowCount - 1].Cells[0].Value = ApplicationName;
+                }
             }
         }
     }

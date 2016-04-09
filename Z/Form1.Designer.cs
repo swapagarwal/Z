@@ -121,10 +121,8 @@
             this.dataGridView1.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.Applications});
             this.dataGridView1.EditMode = System.Windows.Forms.DataGridViewEditMode.EditProgrammatically;
-            this.dataGridView1.Enabled = false;
             this.dataGridView1.Location = new System.Drawing.Point(30, 178);
             this.dataGridView1.Name = "dataGridView1";
-            this.dataGridView1.ReadOnly = true;
             this.dataGridView1.RowHeadersVisible = false;
             this.dataGridView1.RowTemplate.ReadOnly = true;
             this.dataGridView1.ShowEditingIcon = false;
@@ -136,7 +134,6 @@
             this.Applications.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
             this.Applications.HeaderText = "Applications";
             this.Applications.Name = "Applications";
-            this.Applications.ReadOnly = true;
             this.Applications.Text = "";
             this.Applications.TrackVisitedState = false;
             // 
