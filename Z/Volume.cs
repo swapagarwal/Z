@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Diagnostics;
 
 namespace Z
 {
@@ -107,6 +108,8 @@ namespace Z
         private List<VolumeInstance> VolumeInstanceList = new List<VolumeInstance>();
         private VolumeInstance LastUsedVolumeData = new VolumeInstance();
         private bool Dirty = false;
+        private DateTime LastUserActivity = DateTime.MinValue;
+        private static int Threshold = 1 * 60;
 
         private void ReinforcedLearning(VolumeInstance Item)
         {
@@ -125,7 +128,7 @@ namespace Z
             int i = 0;
             foreach (VolumeInstance Instance in VolumeInstanceList)
             {
-                Instance.Weight = Instance.Weight - (Math.Abs(Instance.MasterVolume - Item.MasterVolume) * Factors[i]);
+                Instance.Weight -= Instance.Weight * Math.Abs(Instance.MasterVolume - Item.MasterVolume) * Factors[i];
                 MaxWeight = Math.Max(MaxWeight, Instance.Weight);
                 i++;
             }
@@ -178,19 +181,25 @@ namespace Z
         
         public void AddVolume(VolumeInstance Item)
         {
+            VolumeInstanceList.Add(Item);
+
             if (Dirty && !LastUsedVolumeData.ExactlySame(Item))
             {
                 RecalculateWeights(Item);
             }
 
-            VolumeInstanceList.Add(Item);    
-            
+            LastUserActivity = DateTime.Now;
             LastUsedVolumeData = Item;
             Dirty = false;
         }
 
         public VolumeInstance GetVolume(VolumeInstance Item)
         {
+            if (Math.Abs((Item.TimeStamp - LastUserActivity).TotalSeconds) < Threshold )
+            {
+                return Item;
+            }
+
             VolumeInstance Data = Item.DeepCopy();
             Data.MasterVolume = 0;
 
@@ -216,13 +225,12 @@ namespace Z
             i = 0;
             foreach (VolumeInstance Instance in VolumeInstanceList)
             {
-
                 Data.MasterVolume += Instance.MasterVolume * NetWeights[i];
 
                 int j = 0;
                 foreach(ApplicationVolume App in Instance.Applications)
                 {
-                    App.Volume += Data.Applications[j].Volume * NetWeights[i];
+                    Data.Applications[j].Volume += App.Volume * NetWeights[i];
                     j++;
                 }
 
