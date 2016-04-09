@@ -26,6 +26,11 @@ namespace Z
 
             return false;
         }
+
+        public ApplicationVolume DeepCopy()
+        {
+            return MemberwiseClone() as ApplicationVolume;
+        }
     }
 
     [Serializable()]
@@ -81,6 +86,19 @@ namespace Z
 
             return false;
         }
+
+        public VolumeInstance DeepCopy()
+        {
+            VolumeInstance Item = MemberwiseClone() as VolumeInstance;
+            Item.Applications = new List<ApplicationVolume>();
+
+            foreach (ApplicationVolume App in Applications)
+            {
+                Item.Applications.Add(App.DeepCopy());
+            }
+
+            return Item;
+        }
     }
 
     [Serializable()]
@@ -88,7 +106,7 @@ namespace Z
     {
         private List<VolumeInstance> VolumeInstanceList = new List<VolumeInstance>();
         private VolumeInstance LastUsedVolumeData = new VolumeInstance();
-        private DateTime LastCalculatedVolumeData = DateTime.MinValue;
+        private bool Dirty = false;
 
         private void ReinforcedLearning(VolumeInstance Item)
         {
@@ -160,7 +178,7 @@ namespace Z
         
         public void AddVolume(VolumeInstance Item)
         {
-            if (!LastCalculatedVolumeData.Equals(DateTime.MinValue)  && !LastUsedVolumeData.ExactlySame(Item))
+            if (Dirty && !LastUsedVolumeData.ExactlySame(Item))
             {
                 RecalculateWeights(Item);
             }
@@ -168,12 +186,12 @@ namespace Z
             VolumeInstanceList.Add(Item);    
             
             LastUsedVolumeData = Item;
-            LastCalculatedVolumeData = DateTime.MinValue;
+            Dirty = false;
         }
 
         public VolumeInstance GetVolume(VolumeInstance Item)
         {
-            VolumeInstance Data = new VolumeInstance();
+            VolumeInstance Data = Item.DeepCopy();
             Data.MasterVolume = 0;
 
             foreach(ApplicationVolume App in Data.Applications)
@@ -211,7 +229,7 @@ namespace Z
                 i++;
             }
             
-            LastCalculatedVolumeData = DateTime.Now;
+            Dirty = true;
             LastUsedVolumeData = Data;
             return Data;
         }
@@ -243,11 +261,13 @@ namespace Z
                 
                 BinaryFormatter Serializer = new BinaryFormatter();
                 VolumeHistory = Serializer.Deserialize(FileStream) as Dictionary<string, VolumeInstances>;
-                FileStream.Close();
             }
             catch (Exception ex)
             {
                 VolumeHistory = new Dictionary<string, VolumeInstances>();
+            }
+            finally
+            {
                 FileStream.Close();
             }
         }

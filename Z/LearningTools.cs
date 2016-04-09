@@ -75,10 +75,8 @@ namespace Z
             {
                 SetVolume(VolumeData.GetVolume(VolumeSnapshot));
             }
-            else
-            {
-                VolumeData.AddVolume(VolumeSnapshot);
-            }
+
+            VolumeData.AddVolume(VolumeSnapshot);
         }
     }
 }
