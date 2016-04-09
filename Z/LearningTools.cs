@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Diagnostics;
 using NAudio.CoreAudioApi;
+using System.IO;
+using System.Collections.Generic;
 
 namespace Z
 {
@@ -66,7 +68,7 @@ namespace Z
                 }
             }
         }
-
+        
         public static void ProcessVolume(bool AutomaticVolumeMode)
         {
             VolumeInstance VolumeSnapshot = GetVolumeSnapshot();
@@ -77,6 +79,37 @@ namespace Z
             }
 
             VolumeData.AddVolume(VolumeSnapshot);
+        }
+    }
+
+    static class BasicTools
+    {
+        public static void RecursiveDirectoryrSearch(string DirectoryPath, ref List<string> FileList)
+        {
+            try
+            {
+                foreach (string FilePath in Directory.GetFiles(DirectoryPath))
+                {
+                    FileList.Add(FilePath);
+                }
+
+                foreach (string FolderPath in Directory.GetDirectories(DirectoryPath))
+                {
+                    RecursiveDirectoryrSearch(FolderPath, ref FileList);
+                }
+            }
+            catch (Exception excpt)
+            {
+                Debug.WriteLine(excpt.Message);
+            }
+        }
+
+        public static void LaunchApplication(string ApplicationPath)
+        {
+            Process proc = new Process();
+            Console.WriteLine(ApplicationPath);
+            proc.StartInfo.FileName = ApplicationPath;
+            proc.Start();
         }
     }
 }
