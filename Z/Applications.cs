@@ -55,8 +55,29 @@ namespace Z
         HashSet<string> ProcessList = new HashSet<string>();
     }
 
+    class ApplicationInstances
+    {
+        private List<ApplicationInstance> ApplicationInstanceList = new List<ApplicationInstance>();
+
+        public void AddApplicationInstance(ApplicationInstance Item)
+        {
+            ApplicationInstanceList.Add(Item);
+        }
+    }
+
     class ApplicationModel
     {
-        Dictionary<string, ApplicationInstance> ApplicationMap = new Dictionary<string, ApplicationInstance>();
+        // Map application name to system states when it was started
+        private Dictionary<string, ApplicationInstances> ApplicationMap = new Dictionary<string, ApplicationInstances>();
+
+        public void AddApplicationInstance(string Application, ApplicationInstance Item)
+        {
+            if(!ApplicationMap.ContainsKey(Application))
+            {
+                ApplicationMap.Add(Application, new ApplicationInstances());
+            }
+
+            ApplicationMap[Application].AddApplicationInstance(Item);
+        }
     }
 }
