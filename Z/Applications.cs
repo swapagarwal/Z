@@ -10,7 +10,7 @@ namespace Z
 {
     class InstalledApplicationList
     {
-        Dictionary<string, string> Applications = new Dictionary<string, string>();
+        Dictionary<string, string> ApplicationPaths = new Dictionary<string, string>();
         
         public InstalledApplicationList()
         {
@@ -23,11 +23,26 @@ namespace Z
                 string ApplicationName = Path.GetFileNameWithoutExtension(FilePath);
 
                 // Take the first shortcut found
-                if (!Applications.ContainsKey(ApplicationName))
+                if (!ApplicationPaths.ContainsKey(ApplicationName))
                 {
-                    Applications.Add(ApplicationName, FilePath);
+                    ApplicationPaths.Add(ApplicationName, FilePath);
                 }
             }
+        }
+
+        public List<string> SearchApplications(string substring)
+        {
+            List<string> ApplicationList = new List<string>();
+
+            foreach(string ApplicationName in ApplicationPaths.Keys)
+            {
+                if(ApplicationName.Contains(substring))
+                {
+                    ApplicationList.Add(ApplicationName);
+                }
+            }
+
+            return ApplicationList;
         }
     }
 }
