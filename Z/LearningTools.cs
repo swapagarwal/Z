@@ -153,7 +153,7 @@ namespace Z
             }
             catch (Exception)
             {
-                MessageBox.Show("Sorry, Your System does not support this brightness control...");
+                Debug.WriteLine("Sorry, Your System does not support this brightness control...");
             }
             return BrightnessLevels;
         }

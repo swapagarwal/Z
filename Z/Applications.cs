@@ -36,7 +36,7 @@ namespace Z
 
             foreach(string ApplicationName in ApplicationPaths.Keys)
             {
-                if(ApplicationName.Contains(substring))
+                if(ApplicationName.ToLower().Contains(substring.ToLower()))
                 {
                     ApplicationList.Add(ApplicationName);
                 }
