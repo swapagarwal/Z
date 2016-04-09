@@ -10,7 +10,7 @@ namespace Z
 {
     class InstalledApplicationList
     {
-        Dictionary<string, string> ApplicationPaths = new Dictionary<string, string>();
+        public Dictionary<string, string> ApplicationPaths = new Dictionary<string, string>();
         
         public InstalledApplicationList()
         {
@@ -44,5 +44,19 @@ namespace Z
 
             return ApplicationList;
         }
+    }
+
+    class ApplicationInstance
+    {
+        string LastUsedApplication;
+        DateTime TimeStamp = DateTime.MinValue;
+        bool NetworkStatus;
+        double Weight = 1.0;
+        HashSet<string> ProcessList = new HashSet<string>();
+    }
+
+    class ApplicationModel
+    {
+        Dictionary<string, ApplicationInstance> ApplicationMap = new Dictionary<string, ApplicationInstance>();
     }
 }
