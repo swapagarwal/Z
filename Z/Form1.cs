@@ -32,7 +32,7 @@ namespace Z
         {
             LearningTools.ProcessVolume(volume_mode.Checked);
             bLevels = GetBrightnessLevels();
-            textBox2.Text = GetBrightness().ToString();
+            //textBox2.Text = GetBrightness().ToString();
         }
 
         private void SetVolume(int level)
