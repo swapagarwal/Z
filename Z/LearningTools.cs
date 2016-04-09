@@ -3,6 +3,7 @@ using System.Diagnostics;
 using NAudio.CoreAudioApi;
 using System.IO;
 using System.Collections.Generic;
+using System.Management;
 
 namespace Z
 {
