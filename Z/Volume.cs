@@ -181,11 +181,15 @@ namespace Z
         
         public void AddVolume(VolumeInstance Item)
         {
-            VolumeInstanceList.Add(Item);
-
             if (Dirty && !LastUsedVolumeData.ExactlySame(Item))
             {
+                VolumeInstanceList.Add(Item);
                 RecalculateWeights(Item);
+                Dirty = false;
+            }
+            else if (!Dirty)
+            {
+                VolumeInstanceList.Add(Item);
             }
 
             if (!LastUsedVolumeData.ExactlySame(Item))
@@ -194,7 +198,6 @@ namespace Z
             }
             
             LastUsedVolumeData = Item;
-            Dirty = false;
         }
 
         public VolumeInstance GetVolume(VolumeInstance Item)
