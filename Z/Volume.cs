@@ -194,9 +194,9 @@ namespace Z
             VolumeInstance Data = Item.DeepCopy();
             Data.MasterVolume = 0;
 
-            foreach(ApplicationVolume App in Data.Applications)
+            foreach (ApplicationVolume App in Data.Applications)
             {
-                Data.Applications.Add(App);
+                App.Volume = 0;
             }
 
             List<double> TimeWeights = GetTimeDifferenceWeights(Item);
@@ -298,6 +298,12 @@ namespace Z
         public VolumeInstance GetVolume(VolumeInstance Item)
         {
             string Key = GetKey(Item);
+
+            if (!VolumeHistory.ContainsKey(Key))
+            {
+                return Item;
+            }
+
             VolumeInstance Data = VolumeHistory[Key].GetVolume(Item);
             WriteToFile();
             return Data;

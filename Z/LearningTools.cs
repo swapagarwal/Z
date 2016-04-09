@@ -57,20 +57,21 @@ namespace Z
             DefaultDevice.AudioEndpointVolume.MasterVolumeLevelScalar = (float)Data.MasterVolume;
             Data.TimeStamp = DateTime.Now;
 
-            Debug.Assert(DefaultDevice.AudioMeterInformation.MasterPeakValue > 0);
-
-            for (int i = 0; i < DefaultDevice.AudioSessionManager.Sessions.Count; i++)
+            if (DefaultDevice.AudioMeterInformation.MasterPeakValue > 0)
             {
-                var Session = DefaultDevice.AudioSessionManager.Sessions[i];
-                Process ApplicationProcess = Process.GetProcessById((int)Session.GetProcessID);
-                string ApplicationName = ApplicationProcess.ProcessName;
-
-                foreach (ApplicationVolume Application in Data.Applications)
+                for (int i = 0; i < DefaultDevice.AudioSessionManager.Sessions.Count; i++)
                 {
-                    if (ApplicationName == Application.ApplicationName)
+                    var Session = DefaultDevice.AudioSessionManager.Sessions[i];
+                    Process ApplicationProcess = Process.GetProcessById((int)Session.GetProcessID);
+                    string ApplicationName = ApplicationProcess.ProcessName;
+
+                    foreach (ApplicationVolume Application in Data.Applications)
                     {
-                        Session.SimpleAudioVolume.Volume = (float)Application.Volume;
-                        break;
+                        if (ApplicationName == Application.ApplicationName)
+                        {
+                            Session.SimpleAudioVolume.Volume = (float)Application.Volume;
+                            break;
+                        }
                     }
                 }
             }
