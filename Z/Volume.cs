@@ -26,21 +26,6 @@ namespace Z
 
             return false;
         }
-
-        public bool MostlySame(ApplicationVolume x)
-        {
-            if (x == null)
-            {
-                return false;
-            }
-
-            if (ApplicationName == x.ApplicationName)
-            {
-                return true;
-            }
-
-            return false;
-        }
     }
 
     [Serializable()]
@@ -96,37 +81,6 @@ namespace Z
 
             return false;
         }
-
-        public bool MostlySame(VolumeInstance x)
-        {
-            if (x == null)
-            {
-                return false;
-            }
-
-            if (DeviceName == x.DeviceName)
-            {
-                if (Applications.Count != x.Applications.Count)
-                {
-                    return false;
-                }
-
-                List<ApplicationVolume> a = Applications.OrderBy(o => o.ApplicationName).ToList();
-                List<ApplicationVolume> b = x.Applications.OrderBy(o => o.ApplicationName).ToList();
-
-                for (int i = 0; i < a.Count; i++)
-                {
-                    if (!a[i].MostlySame(b[i]))
-                    {
-                        return false;
-                    }
-                }
-
-                return true;
-            }
-
-            return false;
-        }
     }
 
     [Serializable()]
@@ -135,7 +89,6 @@ namespace Z
         private List<VolumeInstance> VolumeInstanceList = new List<VolumeInstance>();
         private VolumeInstance LastUsedVolumeData = new VolumeInstance();
         private DateTime LastCalculatedVolumeData = DateTime.MinValue;
-        private static int Threshold;
 
         private void ReinforcedLearning(VolumeInstance Item)
         {
@@ -207,7 +160,7 @@ namespace Z
         
         public void AddVolume(VolumeInstance Item)
         {
-            if (Item.TimeStamp.Subtract(LastCalculatedVolumeData).TotalSeconds < Threshold && !LastUsedVolumeData.ExactlySame(Item) && LastUsedVolumeData.MostlySame(Item))
+            if (!LastCalculatedVolumeData.Equals(DateTime.MinValue)  && !LastUsedVolumeData.ExactlySame(Item))
             {
                 RecalculateWeights(Item);
             }
