@@ -58,6 +58,9 @@ namespace Z
         string LastUsedApplication;
         DateTime TimeStamp = DateTime.MinValue;
         bool NetworkStatus;
+        bool PluggedInStatus;
+        int N = 3; // ngram
+        List<string> ApplicationHistory = new List<string>();
         double Weight = 1.0;
         HashSet<string> ProcessList = new HashSet<string>();
     }
