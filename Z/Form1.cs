@@ -45,6 +45,7 @@ namespace Z
         private void ProcessData(object source, ElapsedEventArgs e)
         {
             LearningTools.ProcessVolume(volume_mode.Checked);
+            LearningTools.ProcessBrightness(brightness_mode.Checked);
             bLevels = GetBrightnessLevels();
             //textBox2.Text = GetBrightness().ToString();
         }

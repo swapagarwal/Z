@@ -16,6 +16,11 @@ namespace Z
         public double Brightness;
         public DateTime TimeStamp;
         public double Weight = 1.0;
+
+        public bool ExactlySame(ApplicationBrightness Item)
+        {
+            return ApplicationName == Item.ApplicationName && Brightness == Item.Brightness;
+        }
     }
     
     [Serializable()]
@@ -23,7 +28,8 @@ namespace Z
     {
         private List<ApplicationBrightness> ApplicationBrightnessList = new List<ApplicationBrightness>();
         private ApplicationBrightness LastUsedBrightnessData = new ApplicationBrightness();
-        private DateTime LastCalculatedTime = DateTime.MinValue;
+        private bool Dirty = false;
+        private DateTime LastUserActivity = DateTime.MinValue;
         private static int Threshold = 30; // seconds
 
         private void ReinforcementLearning(ApplicationBrightness Item)
@@ -86,17 +92,30 @@ namespace Z
 
         public void AddBrightness(ApplicationBrightness Item)
         {
-            if(Item.TimeStamp.Subtract(LastCalculatedTime).TotalSeconds < Threshold)
+            if (Dirty && !LastUsedBrightnessData.ExactlySame(Item))
             {
+                ApplicationBrightnessList.Add(Item);
                 RecalculateWeights(Item);
+                Dirty = false;
             }
-            ApplicationBrightnessList.Add(Item);
+            else if (!Dirty)
+            {
+                ApplicationBrightnessList.Add(Item);
+            }
+
+            if (!LastUsedBrightnessData.ExactlySame(Item))
+            {
+                LastUserActivity = Item.TimeStamp;
+            }
             LastUsedBrightnessData = Item;
-            LastCalculatedTime = DateTime.MinValue;
         }
 
         public ApplicationBrightness GetBrightness(ApplicationBrightness Item)
         {
+            if (Math.Abs((Item.TimeStamp - LastUserActivity).TotalSeconds) < Threshold)
+            {
+                return Item;
+            }
             ApplicationBrightness Data = new ApplicationBrightness();
             Data.ApplicationName = Item.ApplicationName;
             Data.Brightness = 0;
@@ -123,8 +142,8 @@ namespace Z
                 Data.Brightness += Instance.Brightness * NetWeights[i];
                 i++;
             }
-            LastUsedBrightnessData = Data;
-            LastCalculatedTime = DateTime.Now;
+            Dirty = true;
+            LastUsedBrightnessData = Item;
             return Data;
         }
     }
@@ -196,6 +215,10 @@ namespace Z
         public ApplicationBrightness GetBrightness(ApplicationBrightness Item)
         {
             string Key = GetKey(Item);
+            if (!BrightnessHistoryData.ContainsKey(Key))
+            {
+                return Item;
+            }
             ApplicationBrightness Data = BrightnessHistoryData[Key].GetBrightness(Item);
             WriteToFile();
             return Data;

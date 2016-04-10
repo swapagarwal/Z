@@ -245,7 +245,7 @@ namespace Z
             }
             
             Dirty = true;
-            LastUsedVolumeData = Data;
+            LastUsedVolumeData = Item;
             return Data;
         }
     }
