@@ -68,7 +68,7 @@ namespace Z
         static Dictionary<string, int> All_Program = new Dictionary<string, int>();
         static Queue<Dictionary<string, int>> All_Data = new Queue<Dictionary<string, int>>();
         static int queueSize = 10;
-        static Dictionary<string, int> Prediction_Data = new Dictionary<string, int>();
+        static Dictionary<string, double> Prediction_Data = new Dictionary<string, double>();
 
         public static void CurrentApplication()
         {
@@ -130,16 +130,24 @@ namespace Z
         }
         public static void showPrediction()
         {
+            Prediction_Data = new Dictionary<string, double>();
+            double val = 0;
             foreach (var i in All_Data)
             {
+                val++;
                 foreach (var j in i)
                 {
                     if (!Prediction_Data.ContainsKey(j.Key))
                         Prediction_Data.Add(j.Key, 0);
+                    else
+                        Prediction_Data[j.Key] += ((double)j.Value)/val;
                 }
             }
-            Prediction_Data = new Dictionary<string, int>();
-            Console.WriteLine("Number of ELement in prediction data  " + Prediction_Data.Count);
+            foreach(var i in Prediction_Data)
+            {
+                Console.WriteLine(i.Key + "   " + i.Value);
+            }
+            //Console.WriteLine("Number of ELement in prediction data  " + Prediction_Data.Count);
         }
     }
 }
