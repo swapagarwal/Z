@@ -14,11 +14,14 @@ namespace Z
         static string text = "";
         static int duration = 0;
         static int queueSize = 10;
+        static int daily = 0;
+        static int weekly = 0;
         static Dictionary<string, int> All_Program = new Dictionary<string, int>();
         static Queue<Dictionary<string, int>> All_Data = new Queue<Dictionary<string, int>>();
         static Dictionary<string, int> Prediction_Data = new Dictionary<string, int>();
         static Dictionary<string, int> fileData = new Dictionary<string, int>();
         static string FileName = "usageData.txt";
+        static string ImageName = "Hourly-";
 
         public static void CurrentApplication()
         {
@@ -71,10 +74,33 @@ namespace Z
                 All_Data.Dequeue();
             }
             All_Data.Enqueue(All_Program);
-            BasicTools.CreateChart(All_Program, "Usage.png");
+            BasicTools.CreateChart(All_Program, ImageName+weekly+daily+".png");
             showPrediction();
+            daily++;
+            weekly++;
+            if (daily == 24)
+            {
+                dailyResult();
+                daily = 0;
+            }
+            if(weekly == 168)
+            {
+                weeklyResult();
+                weekly = 0;
+            }
             All_Program = new Dictionary<string, int>();
         }
+
+        public static void dailyResult()
+        {
+
+        }
+
+        public static void weeklyResult()
+        {
+
+        }
+
         public static void hideResult()
         {
             //display.Hide();

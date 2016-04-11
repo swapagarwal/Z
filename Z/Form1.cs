@@ -106,10 +106,6 @@ namespace Z
                 Usage.displayResult();
                 UsageCounter = 0;
             }
-            else if (UsageCounter == 10)
-            {
-                Usage.hideResult();
-            }
         }
     }
 }
