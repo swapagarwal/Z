@@ -193,7 +193,7 @@ namespace Z
 
             foreach (ApplicationInstance Instance in Items.ApplicationInstanceList)
             {
-                double val = Math.Abs(CurrentTimeStamp.TimeStamp.Subtract(Instance.TimeStamp).TotalDays);
+                double val = Math.Abs(CurrentTimeStamp.Subtract(Instance.TimeStamp).TotalDays);
                 Weights.Add(MaxTimeWeight - slope * Math.Pow(val, 2));
             }
             
@@ -279,7 +279,7 @@ namespace Z
                 CandidateApplications.Add(ApplicationName, probability);
             }
 
-            return CandidateApplications.ToList().OrderBy(x => x.Value).ToList();
+            return CandidateApplications.ToList().OrderBy(x => -x.Value).ToList();
         }
     }
 }

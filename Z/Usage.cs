@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -43,10 +44,9 @@ namespace Z
                 }
                 catch(Exception ex)
                 {
-                    Console.WriteLine(ex.Message);
+                    Debug.WriteLine(ex.Message);
                 }
                 
-
                 duration = 0;
                 name = curr_name;
                 text = curr_text;
@@ -116,7 +116,7 @@ namespace Z
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                Debug.WriteLine(ex.Message);
                 fileData = new Dictionary<string, int>();
             }
         }

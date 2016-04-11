@@ -196,9 +196,9 @@ namespace Z
                 moc.Dispose();
                 mos.Dispose();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                Debug.WriteLine("Sorry, Your System does not support this brightness control...");
+                Debug.WriteLine(ex.Message);
             }
             return BrightnessLevels;
         }
@@ -223,7 +223,7 @@ namespace Z
             }
             catch (Exception ex)
             {
-                Debug.WriteLine("Sorry, Your System does not support this brightness control...");
+                Debug.WriteLine(ex.Message);
                 return 0;
             }
         }
@@ -246,7 +246,7 @@ namespace Z
             }
             catch (Exception ex)
             {
-                Debug.WriteLine("Sorry, Your System does not support this brightness control...");
+                Debug.WriteLine(ex.Message);
             }
         }
     }
@@ -290,9 +290,9 @@ namespace Z
                     RecursiveDirectoryrSearch(FolderPath, ref FileList);
                 }
             }
-            catch (Exception excpt)
+            catch (Exception ex)
             {
-                Debug.WriteLine(excpt.Message);
+                Debug.WriteLine(ex.Message);
             }
         }
 
