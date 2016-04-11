@@ -80,7 +80,7 @@ namespace Z
     {
         // Map application name to system states when it was started
         private Dictionary<string, ApplicationInstances> ApplicationHistoryData = new Dictionary<string, ApplicationInstances>();
-        public string FileName = Environment.ExpandEnvironmentVariables("%USERPROFILE%\\application_data.dat");
+        public string FileName = Environment.ExpandEnvironmentVariables("application_data.dat");
 
         public ApplicationModel()
         {
@@ -89,39 +89,19 @@ namespace Z
 
         public void WriteToFile()
         {
-            Stream FileStream = File.Open(FileName, FileMode.Truncate);
-            BinaryFormatter Serializer = new BinaryFormatter();
-            try
-            {
-                Serializer.Serialize(FileStream, ApplicationHistoryData);
-            }
-            catch (SerializationException e)
-            {
-                Console.WriteLine("Failed to serialize. Reason: " + e.Message);
-                throw;
-            }
-            finally
-            {
-                FileStream.Close();
-            }
+            BasicTools.WriteToFile(FileName, ApplicationHistoryData);
         }
 
         public void ReadFromFile()
         {
-            Stream FileStream = File.Open(FileName, FileMode.OpenOrCreate);
-            BinaryFormatter Serializer = new BinaryFormatter();
             try
             {
-                ApplicationHistoryData = Serializer.Deserialize(FileStream) as Dictionary<string, ApplicationInstances>;
+                ApplicationHistoryData = BasicTools.ReadFromFile(FileName) as Dictionary<string, ApplicationInstances>;
             }
-            catch
+            catch (Exception ex)
             {
-                Console.WriteLine("Failed to deserialize!");
+                Debug.WriteLine(ex.Message);
                 ApplicationHistoryData = new Dictionary<string, ApplicationInstances>();
-            }
-            finally
-            {
-                FileStream.Close();
             }
         }
         
