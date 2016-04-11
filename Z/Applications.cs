@@ -209,9 +209,11 @@ namespace Z
             Dictionary<string, double> CandidateApplications = new Dictionary<string, double>();
             Dictionary<string, string> InstalledApplications = new InstalledApplicationList().ApplicationPaths;
             Dictionary<string, double> ApplicationLastUsedCount = new Dictionary<string, double>();
+            Dictionary<string, double> ApplicationJointCount = new Dictionary<string, double>();
             Dictionary<string, double> ApplicationNetworkCount = new Dictionary<string, double>();
             Dictionary<string, double> ApplicationPluggedInCount = new Dictionary<string, double>();
             Dictionary<string, double> TotalLastUsedCount = new Dictionary<string, double>();
+            Dictionary<string, double> TotalJointCount = new Dictionary<string, double>();
             Dictionary<bool, double> TotalNetworkCount = new Dictionary<bool, double>();
             Dictionary<bool, double> TotalPluggedInCount = new Dictionary<bool, double>();
             
@@ -229,15 +231,20 @@ namespace Z
                 {
                     double count;
                     string LastUsedApplication = Instance.LastUsedApplication;
+                    string SecondLastUsedApplication = Instance.SecondLastUsedApplication;
                     bool NetworkStatus = Instance.NetworkStatus;
                     bool PluggedInStatus = Instance.PluggedInStatus;
 
                     string ApplicationLastUsedKey = ApplicationName + ", " + LastUsedApplication;
+                    string ApplicationJointKey = ApplicationName + ", " + LastUsedApplication + ", " + SecondLastUsedApplication;
                     string ApplicationNetworkKey = ApplicationName + ", " + NetworkStatus;
                     string ApplicationPluggedInKey = ApplicationName + ", " + PluggedInStatus;
 
                     ApplicationLastUsedCount.TryGetValue(ApplicationLastUsedKey, out count);
                     ApplicationLastUsedCount[ApplicationLastUsedKey] = count + Item.Weight * TimeWeights[i] * TimeOfDayWeights[i];
+
+                    ApplicationJointCount.TryGetValue(ApplicationJointKey, out count);
+                    ApplicationJointCount[ApplicationJointKey] = count + Item.Weight * TimeWeights[i] * TimeOfDayWeights[i];
 
                     ApplicationNetworkCount.TryGetValue(ApplicationNetworkKey, out count);
                     ApplicationNetworkCount[ApplicationNetworkKey] = count + Item.Weight * TimeWeights[i] * TimeOfDayWeights[i];
@@ -247,7 +254,10 @@ namespace Z
 
                     TotalLastUsedCount.TryGetValue(LastUsedApplication, out count);
                     TotalLastUsedCount[LastUsedApplication] = count + Item.Weight * TimeWeights[i] * TimeOfDayWeights[i];
-                    
+
+                    TotalJointCount.TryGetValue(LastUsedApplication + ", " + SecondLastUsedApplication, out count);
+                    TotalJointCount[LastUsedApplication + ", " + SecondLastUsedApplication] = count + Item.Weight * TimeWeights[i] * TimeOfDayWeights[i];
+
                     TotalNetworkCount.TryGetValue(NetworkStatus, out count);
                     TotalNetworkCount[NetworkStatus] = count + Item.Weight * TimeWeights[i] * TimeOfDayWeights[i];
 
@@ -264,11 +274,16 @@ namespace Z
                 double ab, b;
 
                 string ApplicationLastUsedKey = ApplicationName + ", " + Item.LastUsedApplication;
+                string ApplicationJointKey = ApplicationName + ", " + Item.LastUsedApplication + ", " + Item.SecondLastUsedApplication;
                 string ApplicationNetworkKey = ApplicationName + ", " + Item.NetworkStatus;
                 string ApplicationPluggedInKey = ApplicationName + ", " + Item.PluggedInStatus;
 
                 ApplicationLastUsedCount.TryGetValue(ApplicationLastUsedKey, out ab);
                 TotalLastUsedCount.TryGetValue(Item.LastUsedApplication, out b);
+                probability *= (b == 0) ? (1.0) : (ab / b);
+
+                ApplicationJointCount.TryGetValue(ApplicationJointKey, out ab);
+                TotalJointCount.TryGetValue(Item.LastUsedApplication + ", " + Item.SecondLastUsedApplication, out b);
                 probability *= (b == 0) ? (1.0) : (ab / b);
 
                 ApplicationNetworkCount.TryGetValue(ApplicationNetworkKey, out ab);
