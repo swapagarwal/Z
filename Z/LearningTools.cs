@@ -51,7 +51,7 @@ namespace Z
 
             if (DemoteList.Count > 0)
             {
-                // ApplicationData.ReinforcedLearning(ApplicationName, DemoteList, ApplicationSnapshot);
+                ApplicationData.ReinforcedLearning(ApplicationName, DemoteList, ApplicationSnapshot);
             }
 
             UserApplications.StartApplication(ApplicationName);
@@ -381,7 +381,6 @@ namespace Z
             Stream FileStream = File.Open(FilePath, FileMode.OpenOrCreate);
             try
             {
-
                 BinaryFormatter Serializer = new BinaryFormatter();
                 Object = Serializer.Deserialize(FileStream);
                 FileStream.Close();
@@ -402,8 +401,7 @@ namespace Z
             
             List<string> Labels = PlotData.Keys.ToList();
             List<int> DataCount = PlotData.Values.ToList();
-
-
+            
             chart.Series.Add(new Series("Data"));
             chart.Series["Data"].ChartType = SeriesChartType.Pie;
             chart.Series["Data"]["PieLabelStyle"] = "Outside";
