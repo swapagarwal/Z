@@ -13,6 +13,7 @@ namespace Z
     public partial class Form1 : Form
     {
         InstalledApplicationList UserApplications = new InstalledApplicationList();
+        ApplicationModel ApplicationData = new ApplicationModel();
         byte[] bLevels; //array of valid level values
 
         public Form1()

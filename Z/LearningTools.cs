@@ -283,19 +283,12 @@ namespace Z
         public static string GetTopWindowName()
         {
             IntPtr hWnd = GetForegroundWindow();
-            uint lpdwProcessId;
-            GetWindowThreadProcessId(hWnd, out lpdwProcessId);
+            uint pid;
+            GetWindowThreadProcessId(hWnd, out pid);
 
-            IntPtr hProcess = OpenProcess(0x0410, false, lpdwProcessId);
-
-            StringBuilder text = new StringBuilder(1000);
-            //StringBuilder text2 = new StringBuilder(1000);
-            GetModuleBaseName(hProcess, IntPtr.Zero, text, text.Capacity);
-            //GetModuleFileNameEx(hProcess, IntPtr.Zero, text2, text2.Capacity);
-
-            CloseHandle(hProcess);
-
-            return text.ToString();// + " # " + text2.ToString();
+            Process TopWindowProcess = Process.GetProcessById((int)pid);
+            
+            return TopWindowProcess.MainModule.FileVersionInfo.FileDescription; 
         }
 
         public static void WriteToFile(string FileName, object Object)
