@@ -13,9 +13,7 @@ namespace Z
     public partial class Form1 : Form
     {
         InstalledApplicationList UserApplications = new InstalledApplicationList();
-        ApplicationModel ApplicationData = new ApplicationModel();
-        string LastUsedApplication = "";
-        string SecondLastUsedApplication = ""; 
+        
         int UsageCounter = 0;
 
         public Form1()
@@ -43,19 +41,17 @@ namespace Z
         private void dataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
         {
             string ApplicationName = dataGridView1.Rows[e.RowIndex].Cells[0].Value as string;
+            List<string> DemoteList = new List<string>();
 
-            ApplicationInstance SystemState = new ApplicationInstance();
-            SystemState.LastUsedApplication = LastUsedApplication;
-            SystemState.SecondLastUsedApplication = SecondLastUsedApplication;
-            SystemState.NetworkStatus = BasicTools.CheckNetworkStatus();
-            SystemState.PluggedInStatus = BasicTools.CheckPluggedIn();
-            SystemState.TimeStamp = DateTime.Now;
-            SystemState.ProcessList = BasicTools.GetProcessList();
-            ApplicationData.AddApplicationInstance(ApplicationName, SystemState);
+            if (application_searcher.Text == "" && e.RowIndex > 0)
+            {
+                for (int i = 0; i < e.RowIndex; i++)
+                {
+                    DemoteList.Add(dataGridView1.Rows[i].Cells[0].Value as string);
+                }
+            }
 
-            UserApplications.StartApplication(ApplicationName);
-            SecondLastUsedApplication = LastUsedApplication;
-            LastUsedApplication = ApplicationName;
+            LearningTools.ProcessApplication(ApplicationName, DemoteList);
         }
 
         private void ProcessData(object source, ElapsedEventArgs e)

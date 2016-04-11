@@ -104,7 +104,7 @@ namespace Z
                 ApplicationHistoryData = new Dictionary<string, ApplicationInstances>();
             }
         }
-        
+
         public void AddApplicationInstance(string Application, ApplicationInstance Item)
         {
             if(!ApplicationHistoryData.ContainsKey(Application))

@@ -20,7 +20,39 @@ namespace Z
         private static VolumeModel VolumeData = new VolumeModel();
         private static BrightnessModel BrightnessData = new BrightnessModel();
         private static byte[] bLevels = GetBrightnessLevels();
-        
+        private static ApplicationModel ApplicationData = new ApplicationModel();
+        private static string LastUsedApplication = "";
+        private static string SecondLastUsedApplication = "";
+        private static InstalledApplicationList UserApplications = new InstalledApplicationList();
+
+        public static ApplicationInstance GetApplicationSnapShot()
+        {
+            ApplicationInstance ApplicationSnapShot = new ApplicationInstance();
+            ApplicationSnapShot.LastUsedApplication = LastUsedApplication;
+            ApplicationSnapShot.SecondLastUsedApplication = SecondLastUsedApplication;
+            ApplicationSnapShot.NetworkStatus = BasicTools.CheckNetworkStatus();
+            ApplicationSnapShot.PluggedInStatus = BasicTools.CheckPluggedIn();
+            ApplicationSnapShot.TimeStamp = DateTime.Now;
+            ApplicationSnapShot.ProcessList = BasicTools.GetProcessList();
+
+            return ApplicationSnapShot;
+        }
+
+        public static void ProcessApplication(string ApplicationName, List<string> DemoteList)
+        {
+            ApplicationInstance ApplicationSnapshot = GetApplicationSnapShot();
+            ApplicationData.AddApplicationInstance(ApplicationName, ApplicationSnapshot);
+
+            if (DemoteList.Count > 0)
+            {
+                // ApplicationData.ReinforcedLearning(ApplicationName, DemoteList, ApplicationSnapshot);
+            }
+
+            UserApplications.StartApplication(ApplicationName);
+            SecondLastUsedApplication = LastUsedApplication;
+            LastUsedApplication = ApplicationName;
+        }
+
         public static VolumeInstance GetVolumeSnapshot()
         {
             VolumeInstance Data = new VolumeInstance();
