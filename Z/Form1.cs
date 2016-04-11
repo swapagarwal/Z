@@ -322,5 +322,31 @@ namespace Z
                 }
             }
         }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            var x = Process.GetProcesses();
+
+            System.Timers.Timer myTimer = new System.Timers.Timer();
+            myTimer.Elapsed += new ElapsedEventHandler(DisplayUsage);
+            myTimer.Interval = 1000; // ms
+            myTimer.Start();
+        }
+
+        static int counter;
+        public void DisplayUsage(object sender, EventArgs e)
+        {
+            Usage.CurrentApplication();
+            counter++;
+            if (counter == 20)
+            {
+                Usage.displayResult();
+                counter = 0;
+            }
+            else if (counter == 10)
+            {
+                Usage.hideResult();
+            }
+        }
     }
 }

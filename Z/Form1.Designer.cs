@@ -38,6 +38,7 @@
             this.application_searcher = new System.Windows.Forms.TextBox();
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
             this.Applications = new System.Windows.Forms.DataGridViewLinkColumn();
+            this.button4 = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -137,11 +138,22 @@
             this.Applications.Text = "";
             this.Applications.TrackVisitedState = false;
             // 
+            // button4
+            // 
+            this.button4.Location = new System.Drawing.Point(80, 118);
+            this.button4.Name = "button4";
+            this.button4.Size = new System.Drawing.Size(75, 23);
+            this.button4.TabIndex = 9;
+            this.button4.Text = "Usage";
+            this.button4.UseVisualStyleBackColor = true;
+            this.button4.Click += new System.EventHandler(this.button4_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(284, 336);
+            this.Controls.Add(this.button4);
             this.Controls.Add(this.dataGridView1);
             this.Controls.Add(this.application_searcher);
             this.Controls.Add(this.brightness_mode);
@@ -171,6 +183,7 @@
         private System.Windows.Forms.TextBox application_searcher;
         private System.Windows.Forms.DataGridView dataGridView1;
         private System.Windows.Forms.DataGridViewLinkColumn Applications;
+        private System.Windows.Forms.Button button4;
     }
 }
 
