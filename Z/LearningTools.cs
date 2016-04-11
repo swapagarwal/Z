@@ -139,12 +139,14 @@ namespace Z
 
         public static byte[] GetBrightnessLevels()
         {
-            ManagementScope s = new ManagementScope("root\\WMI");
-            SelectQuery q = new SelectQuery("WmiMonitorBrightness");
-            ManagementObjectSearcher mos = new ManagementObjectSearcher(s, q);
             byte[] BrightnessLevels = new byte[0];
+
             try
             {
+                ManagementScope s = new ManagementScope("root\\WMI");
+                SelectQuery q = new SelectQuery("WmiMonitorBrightness");
+                ManagementObjectSearcher mos = new ManagementObjectSearcher(s, q);
+                
                 ManagementObjectCollection moc = mos.Get();
                 foreach (ManagementObject o in moc)
                 {
@@ -163,41 +165,56 @@ namespace Z
 
         public static int GetBrightness()
         {
-            ManagementScope s = new ManagementScope("root\\WMI");
-            SelectQuery q = new SelectQuery("WmiMonitorBrightness");
-            ManagementObjectSearcher mos = new ManagementObjectSearcher(s, q);
-            ManagementObjectCollection moc = mos.Get();
-            byte curBrightness = 0;
-            foreach (ManagementObject o in moc)
+            try
             {
-                curBrightness = (byte)o.GetPropertyValue("CurrentBrightness");
-                break;
+                ManagementScope s = new ManagementScope("root\\WMI");
+                SelectQuery q = new SelectQuery("WmiMonitorBrightness");
+                ManagementObjectSearcher mos = new ManagementObjectSearcher(s, q);
+                ManagementObjectCollection moc = mos.Get();
+                byte curBrightness = 0;
+                foreach (ManagementObject o in moc)
+                {
+                    curBrightness = (byte)o.GetPropertyValue("CurrentBrightness");
+                    break;
+                }
+                moc.Dispose();
+                mos.Dispose();
+                return curBrightness;
             }
-            moc.Dispose();
-            mos.Dispose();
-            return (int)curBrightness;
+            catch (Exception ex)
+            {
+                Debug.WriteLine("Sorry, Your System does not support this brightness control...");
+                return 0;
+            }
         }
 
         public static void SetBrightness(byte targetBrightness)
         {
-            ManagementScope s = new ManagementScope("root\\WMI");
-            SelectQuery q = new SelectQuery("WmiMonitorBrightnessMethods");
-            ManagementObjectSearcher mos = new ManagementObjectSearcher(s, q);
-            ManagementObjectCollection moc = mos.Get();
-            foreach (ManagementObject o in moc)
+            try
             {
-                o.InvokeMethod("WmiSetBrightness", new Object[] { uint.MaxValue, targetBrightness });
-                break;
+                ManagementScope s = new ManagementScope("root\\WMI");
+                SelectQuery q = new SelectQuery("WmiMonitorBrightnessMethods");
+                ManagementObjectSearcher mos = new ManagementObjectSearcher(s, q);
+                ManagementObjectCollection moc = mos.Get();
+                foreach (ManagementObject o in moc)
+                {
+                    o.InvokeMethod("WmiSetBrightness", new Object[] { uint.MaxValue, targetBrightness });
+                    break;
+                }
+                moc.Dispose();
+                mos.Dispose();
             }
-            moc.Dispose();
-            mos.Dispose();
+            catch (Exception ex)
+            {
+                Debug.WriteLine("Sorry, Your System does not support this brightness control...");
+            }
         }
     }
 
     static class BasicTools
     {
-        public static string FolderPath = "%USERPROFILE%\\Z\\";
-
+        public static string FolderPath = Environment.ExpandEnvironmentVariables("%USERPROFILE%\\Z\\");
+        
         public static void RecursiveDirectoryrSearch(string DirectoryPath, ref List<string> FileList)
         {
             try
@@ -283,9 +300,10 @@ namespace Z
 
         public static void WriteToFile(string FileName, object Object)
         {
-            string FilePath = Environment.ExpandEnvironmentVariables(FolderPath + FileName);
+            string FilePath = FolderPath + FileName;
+            Directory.CreateDirectory(FolderPath);
 
-            Stream FileStream = File.Open(FilePath, FileMode.Truncate);
+            Stream FileStream = File.Open(FilePath, FileMode.Create);
             BinaryFormatter Serializer = new BinaryFormatter();
             Serializer.Serialize(FileStream, Object);
             FileStream.Close();
@@ -293,7 +311,8 @@ namespace Z
 
         public static object ReadFromFile(string FileName)
         {
-            string FilePath = Environment.ExpandEnvironmentVariables(FolderPath + FileName);
+            string FilePath = FolderPath + FileName;
+            Directory.CreateDirectory(FolderPath);
             object Object;
 
             Stream FileStream = File.Open(FilePath, FileMode.OpenOrCreate);

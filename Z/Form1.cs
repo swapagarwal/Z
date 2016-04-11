@@ -5,9 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.Management;
-using System.Diagnostics;
 using System.Runtime.InteropServices;
-using System.Timers;
 using System.Collections.Generic;
 
 namespace Z
