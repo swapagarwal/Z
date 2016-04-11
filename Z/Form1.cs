@@ -43,7 +43,17 @@ namespace Z
 
         private void dataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
         {
-            KeyValuePair<string, double> ClickedApplication = DisplayedResults[e.RowIndex];
+            KeyValuePair<string, double> ClickedApplication = new KeyValuePair<string, double>();
+
+            if (application_searcher.Text == "")
+            {
+                ClickedApplication = DisplayedResults[e.RowIndex];
+            }
+            else
+            {
+                ClickedApplication = new KeyValuePair<string, double>(dataGridView1.Rows[e.RowIndex].Cells[0].Value as string, 1);
+            }
+
             List<KeyValuePair<string, double>> DemoteList = new List<KeyValuePair<string, double>>();
 
             if (application_searcher.Text == "" && e.RowIndex > 0)
@@ -55,6 +65,11 @@ namespace Z
             }
 
             LearningTools.ProcessApplication(ClickedApplication, DemoteList);
+
+            if (application_searcher.Text == "")
+            {
+                DisplayPredictions();
+            }
         }
 
         private void ProcessData(object source, ElapsedEventArgs e)
@@ -66,6 +81,7 @@ namespace Z
         
         private void DisplayPredictions()
         {
+            dataGridView1.Rows.Clear();
             DisplayedResults = LearningTools.GetApplicationPredictions();
 
             List<string> Applications = DisplayedResults.Select(x => x.Key).ToList();
@@ -78,17 +94,16 @@ namespace Z
 
         private void application_searcher_TextChanged(object sender, EventArgs e)
         {
-            dataGridView1.Rows.Clear();
-
             if (application_searcher.Text == "")
             {
                 DisplayPredictions();
             }
             else
             {
+                dataGridView1.Rows.Clear();
                 List<string> Applications = UserApplications.SearchApplications(application_searcher.Text);
                 DisplayedResults.Clear();
-
+                
                 foreach (string ApplicationName in Applications)
                 {
                     dataGridView1.Rows.Add();

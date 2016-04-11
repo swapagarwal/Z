@@ -206,6 +206,7 @@ namespace Z
             {
                 BrightnessHistoryData.Add(Key, new BrightnessHistory());
             }
+
             BrightnessHistoryData[Key].AddBrightness(Item);
             WriteToFile();
         }

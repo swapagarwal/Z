@@ -136,6 +136,11 @@ namespace Z
             List<double> Factors = new List<double>();
             foreach (KeyValuePair<string, double> DemotedApplication in ApplicationsDemoteList)
             {
+                if(!ApplicationHistoryData.ContainsKey(DemotedApplication.Key))
+                {
+                    continue;
+                }
+
                 ApplicationInstances ApplicationHistory = ApplicationHistoryData[DemotedApplication.Key];
                 foreach (ApplicationInstance Instance in ApplicationHistory.ApplicationInstanceList)
                 {
@@ -148,6 +153,11 @@ namespace Z
             int i = 0;
             foreach (KeyValuePair<string, double> DemotedApplication in ApplicationsDemoteList)
             {
+                if (!ApplicationHistoryData.ContainsKey(DemotedApplication.Key))
+                {
+                    continue;
+                }
+
                 ApplicationInstances ApplicationHistory = ApplicationHistoryData[DemotedApplication.Key];
                 foreach (ApplicationInstance Instance in ApplicationHistory.ApplicationInstanceList)
                 {
@@ -159,6 +169,7 @@ namespace Z
                     i++;
                 }
             }
+
             ApplicationInstances OpenedApplicationHistory = ApplicationHistoryData[OpenedApplicationName.Key];
             foreach (ApplicationInstance Instance in OpenedApplicationHistory.ApplicationInstanceList)
             {
