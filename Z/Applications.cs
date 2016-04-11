@@ -86,6 +86,14 @@ namespace Z
         // Map application name to system states when it was started
         private Dictionary<string, ApplicationInstances> ApplicationHistoryData = new Dictionary<string, ApplicationInstances>();
         public string FileName = Environment.ExpandEnvironmentVariables("application_data.dat");
+        private static double MinTimeOfDayWeight = 0.001;
+        private static double MaxTimeOfDayWeight = 1.0;
+        private static double MinTimeWeight = 0.001;
+        private static double MaxTimeWeight = 1.0;
+        private static double MinWeight = 0.5;
+        private static double MaxWeight = 1.5;
+        private static double NegativeReinforcementFactor = 0.05;
+        private static double PositiveReinforcementFactor = 0.1;
 
         public ApplicationModel()
         {
@@ -120,24 +128,103 @@ namespace Z
             ApplicationHistoryData[Application].AddApplicationInstance(Item);
         }
 
-        public List<string> PredictApplications(ApplicationInstance Item) // Get Applications
+        private void ReinforcedLearning(KeyValuePair<string, double> OpenedApplicationName, List<KeyValuePair<string, double>> ApplicationsDemoteList, ApplicationInstance ApplicationSnapshot)
+        {
+            List<double> Factors = new List<double>();
+            foreach (KeyValuePair<string, double> DemotedApplication in ApplicationsDemoteList)
+            {
+                ApplicationInstances ApplicationHistory = ApplicationHistoryData[DemotedApplication.Key];
+                foreach (ApplicationInstance Instance in ApplicationHistory.ApplicationInstanceList)
+                {
+                    double val = Math.Abs(ApplicationSnapshot.TimeStamp.TimeOfDay.Subtract(Instance.TimeStamp.TimeOfDay).TotalHours);
+                    Factors.Add(Math.Pow(Math.Min(val, 24 - val), 2));
+                }
+            }
+            Factors = Factors.Select(x => Math.Exp(-x)).ToList();
+            
+            int i = 0;
+            foreach (KeyValuePair<string, double> DemotedApplication in ApplicationsDemoteList)
+            {
+                ApplicationInstances ApplicationHistory = ApplicationHistoryData[DemotedApplication.Key];
+                foreach (ApplicationInstance Instance in ApplicationHistory.ApplicationInstanceList)
+                {
+                    if (Instance.AlmostSame(ApplicationSnapshot))
+                    {
+                        double weight = Instance.Weight * (1 - Math.Abs(DemotedApplication.Value - OpenedApplicationName.Value) * Factors[i] * NegativeReinforcementFactor);
+                        Instance.Weight = Math.Min(MaxWeight, Math.Max(MinWeight, weight));
+                    }
+                    i++;
+                }
+            }
+            ApplicationInstances OpenedApplicationHistory = ApplicationHistoryData[OpenedApplicationName.Key];
+            foreach (ApplicationInstance Instance in OpenedApplicationHistory.ApplicationInstanceList)
+            {
+                if (Instance.AlmostSame(ApplicationSnapshot))
+                {
+                    double weight = Instance.Weight * (1 + PositiveReinforcementFactor);
+                    Instance.Weight = Math.Min(MaxWeight, Math.Max(MinWeight, weight));
+                }
+            }
+        }
+
+        private List<double> GetTimeOfDayDifferenceWeights(ApplicationInstances Items, DateTime CurrentTimeStamp)
+        {
+            List<double> Weights = new List<double>();
+            // y = c - m * x
+            double MaxTimeDifference = 12; // hours
+            double slope = (MaxTimeOfDayWeight - MinTimeOfDayWeight) / MaxTimeDifference;
+
+            foreach (ApplicationInstance Instance in Items.ApplicationInstanceList)
+            {
+                double val = Math.Abs(Instance.TimeStamp.TimeOfDay.Subtract(CurrentTimeStamp.TimeOfDay).TotalHours);
+                Weights.Add(MaxTimeOfDayWeight - slope * Math.Min(val, 24 - val));
+            }
+
+            Debug.Assert(Weights.TrueForAll(x => x > 0 && x <= 1));
+            return Weights;
+        }
+
+        private List<double> GetTimeDifferenceWeights(ApplicationInstances Items, DateTime CurrentTimeStamp)
+        {
+            List<double> Weights = new List<double>();
+            // y = c - m * x * x
+            double MaxTimeDifference = 100; // days
+            double slope = (MaxTimeWeight - MinTimeWeight) / Math.Pow(MaxTimeDifference, 2);
+
+            foreach (ApplicationInstance Instance in Items.ApplicationInstanceList)
+            {
+                double val = Math.Abs(CurrentTimeStamp.TimeStamp.Subtract(Instance.TimeStamp).TotalDays);
+                Weights.Add(MaxTimeWeight - slope * Math.Pow(val, 2));
+            }
+            
+            Debug.Assert(Weights.TrueForAll(x => x > 0 && x <= 1));
+            return Weights;
+        }
+
+        public List<KeyValuePair<string, double>> PredictApplications(ApplicationInstance Item) // Get Applications
         {
             Dictionary<string, double> CandidateApplications = new Dictionary<string, double>();
             Dictionary<string, string> InstalledApplications = new InstalledApplicationList().ApplicationPaths;
-            Dictionary<string, int> ApplicationLastUsedCount = new Dictionary<string, int>();
-            Dictionary<string, int> ApplicationNetworkCount = new Dictionary<string, int>();
-            Dictionary<string, int> ApplicationPluggedInCount = new Dictionary<string, int>();
-            Dictionary<string, int> TotalLastUsedCount = new Dictionary<string, int>();
-            Dictionary<bool, int> TotalNetworkCount = new Dictionary<bool, int>();
-            Dictionary<bool, int> TotalPluggedInCount = new Dictionary<bool, int>();
-
+            Dictionary<string, double> ApplicationLastUsedCount = new Dictionary<string, double>();
+            Dictionary<string, double> ApplicationNetworkCount = new Dictionary<string, double>();
+            Dictionary<string, double> ApplicationPluggedInCount = new Dictionary<string, double>();
+            Dictionary<string, double> TotalLastUsedCount = new Dictionary<string, double>();
+            Dictionary<bool, double> TotalNetworkCount = new Dictionary<bool, double>();
+            Dictionary<bool, double> TotalPluggedInCount = new Dictionary<bool, double>();
+            
             foreach (KeyValuePair<string, ApplicationInstances> entry in ApplicationHistoryData)
             {
                 string ApplicationName = entry.Key;
                 ApplicationInstances ApplicationHistory = entry.Value;
+
+                List<double> TimeWeights = GetTimeDifferenceWeights(ApplicationHistory, Item.TimeStamp);
+                List<double> TimeOfDayWeights = GetTimeOfDayDifferenceWeights(ApplicationHistory, Item.TimeStamp);
+                List<double> NetWeights = new List<double>();
+
+                int i = 0;
                 foreach (ApplicationInstance Instance in ApplicationHistory.ApplicationInstanceList)
                 {
-                    int count;
+                    double count;
                     string LastUsedApplication = Instance.LastUsedApplication;
                     bool NetworkStatus = Instance.NetworkStatus;
                     bool PluggedInStatus = Instance.PluggedInStatus;
@@ -147,29 +234,31 @@ namespace Z
                     string ApplicationPluggedInKey = ApplicationName + ", " + PluggedInStatus;
 
                     ApplicationLastUsedCount.TryGetValue(ApplicationLastUsedKey, out count);
-                    ApplicationLastUsedCount[ApplicationLastUsedKey] = count + 1;
+                    ApplicationLastUsedCount[ApplicationLastUsedKey] = count + Item.Weight * TimeWeights[i] * TimeOfDayWeights[i];
 
                     ApplicationNetworkCount.TryGetValue(ApplicationNetworkKey, out count);
-                    ApplicationNetworkCount[ApplicationNetworkKey] = count + 1;
+                    ApplicationNetworkCount[ApplicationNetworkKey] = count + Item.Weight * TimeWeights[i] * TimeOfDayWeights[i];
 
                     ApplicationPluggedInCount.TryGetValue(ApplicationPluggedInKey, out count);
-                    ApplicationPluggedInCount[ApplicationPluggedInKey] = count + 1;
+                    ApplicationPluggedInCount[ApplicationPluggedInKey] = count + Item.Weight * TimeWeights[i] * TimeOfDayWeights[i];
 
                     TotalLastUsedCount.TryGetValue(LastUsedApplication, out count);
-                    TotalLastUsedCount[LastUsedApplication] = count + 1;
+                    TotalLastUsedCount[LastUsedApplication] = count + Item.Weight * TimeWeights[i] * TimeOfDayWeights[i];
                     
                     TotalNetworkCount.TryGetValue(NetworkStatus, out count);
-                    TotalNetworkCount[NetworkStatus] = count + 1;
+                    TotalNetworkCount[NetworkStatus] = count + Item.Weight * TimeWeights[i] * TimeOfDayWeights[i];
 
                     TotalPluggedInCount.TryGetValue(PluggedInStatus, out count);
-                    TotalPluggedInCount[PluggedInStatus] = count + 1;
+                    TotalPluggedInCount[PluggedInStatus] = count + Item.Weight * TimeWeights[i] * TimeOfDayWeights[i];
+
+                    i++;
                 }
             }
 
             foreach (string ApplicationName in InstalledApplications.Keys)
             {
                 double probability = 1.0;
-                int ab, b;
+                double ab, b;
 
                 string ApplicationLastUsedKey = ApplicationName + ", " + Item.LastUsedApplication;
                 string ApplicationNetworkKey = ApplicationName + ", " + Item.NetworkStatus;
@@ -190,7 +279,7 @@ namespace Z
                 CandidateApplications.Add(ApplicationName, probability);
             }
 
-            return CandidateApplications.ToList().OrderBy(x => x.Value).ToList().Select(x => x.Key).ToList();
+            return CandidateApplications.ToList().OrderBy(x => x.Value).ToList();
         }
     }
 }
