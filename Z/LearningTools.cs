@@ -8,6 +8,8 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
 using System.Linq;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.Web.UI.DataVisualization.Charting;
 
 namespace Z
 {
@@ -194,6 +196,8 @@ namespace Z
 
     static class BasicTools
     {
+        public static string FolderPath = "%USERPROFILE%\\Z\\";
+
         public static void RecursiveDirectoryrSearch(string DirectoryPath, ref List<string> FileList)
         {
             try
@@ -275,6 +279,61 @@ namespace Z
             CloseHandle(hProcess);
 
             return text.ToString();// + " # " + text2.ToString();
+        }
+
+        public static void WriteToFile(string FileName, object Object)
+        {
+            string FilePath = Environment.ExpandEnvironmentVariables(FolderPath + FileName);
+
+            Stream FileStream = File.Open(FilePath, FileMode.Truncate);
+            BinaryFormatter Serializer = new BinaryFormatter();
+            Serializer.Serialize(FileStream, Object);
+            FileStream.Close();
+        }
+
+        public static object ReadFromFile(string FileName)
+        {
+            string FilePath = Environment.ExpandEnvironmentVariables(FolderPath + FileName);
+            object Object;
+
+            Stream FileStream = File.Open(FilePath, FileMode.OpenOrCreate);
+            try
+            {
+
+                BinaryFormatter Serializer = new BinaryFormatter();
+                Object = Serializer.Deserialize(FileStream);
+                FileStream.Close();
+                return Object;
+            }
+            catch (Exception ex)
+            {
+                FileStream.Close();
+                throw ex;
+            }
+        }
+
+        public static void CreateChart(Dictionary<string, int> PlotData, string FileName = "data.png")
+        {
+            string FilePath = Environment.ExpandEnvironmentVariables(FolderPath + FileName);
+            Chart chart = new Chart();
+            chart.ChartAreas.Add(new ChartArea());
+            
+            List<string> Labels = PlotData.Keys.ToList();
+            List<int> DataCount = PlotData.Values.ToList();
+
+
+            chart.Series.Add(new Series("Data"));
+            chart.Series["Data"].ChartType = SeriesChartType.Pie;
+            chart.Series["Data"]["PieLabelStyle"] = "Outside";
+            chart.Series["Data"]["PieLineColor"] = "Black";
+            chart.Series["Data"].Points.DataBindXY(Labels, DataCount);
+
+            MemoryStream ms = new MemoryStream();
+            chart.SaveImage(ms, ChartImageFormat.Png);
+            FileStream f = new FileStream(FilePath, FileMode.Create);
+            ms.WriteTo(f);
+            f.Close();
+            ms.Close();
         }
     }
 }

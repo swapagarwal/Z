@@ -253,7 +253,7 @@ namespace Z
     class VolumeModel
     {
         private Dictionary<string, VolumeInstances> VolumeHistory = new Dictionary<string, VolumeInstances>();        
-        public string FileName = Environment.ExpandEnvironmentVariables("%USERPROFILE%\\volume_data.dat");
+        public string FileName = "volume_data.dat";
 
         public VolumeModel()
         {
@@ -262,28 +262,19 @@ namespace Z
         
         public void WriteToFile()
         {
-            Stream FileStream = File.Open(FileName, FileMode.Truncate);
-            BinaryFormatter Serializer = new BinaryFormatter();
-            Serializer.Serialize(FileStream, VolumeHistory);
-            FileStream.Close();
+            BasicTools.WriteToFile(FileName, VolumeHistory);
         }
 
         public void ReadFromFile()
         {
-            Stream FileStream = File.Open(FileName, FileMode.OpenOrCreate);
             try
             {
-                
-                BinaryFormatter Serializer = new BinaryFormatter();
-                VolumeHistory = Serializer.Deserialize(FileStream) as Dictionary<string, VolumeInstances>;
+                VolumeHistory = BasicTools.ReadFromFile(FileName) as Dictionary<string, VolumeInstances>;
             }
             catch (Exception ex)
             {
+                Debug.WriteLine(ex.Message);
                 VolumeHistory = new Dictionary<string, VolumeInstances>();
-            }
-            finally
-            {
-                FileStream.Close();
             }
         }
 
