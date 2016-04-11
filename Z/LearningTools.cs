@@ -348,9 +348,8 @@ namespace Z
             GetWindowThreadProcessId(hWnd, out pid);
 
             Process TopWindowProcess = Process.GetProcessById((int)pid);
-            Process TopWindowProcessTest = Process.GetCurrentProcess();
-
-            return TopWindowProcess.MainModule.FileVersionInfo.FileDescription; 
+            
+            return TopWindowProcess.MainModule.FileVersionInfo.FileDescription;
         }
 
         public static void WriteToFile(string FileName, object Object)
