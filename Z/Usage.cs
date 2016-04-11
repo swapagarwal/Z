@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -88,7 +89,7 @@ namespace Z
             All_Data.Enqueue(All_Program);
             All_Data_Daily.Enqueue(All_Program);
             All_Data_weekly.Enqueue(All_Program);
-            BasicTools.CreateChart(All_Program, ImageName+weekly+daily+".png");
+            BasicTools.CreateChart(All_Program, ImageName + DateTime.Now.ToFileTime().ToString() +".png");
             showPrediction();
             daily++;
             weekly++;
@@ -107,7 +108,7 @@ namespace Z
 
         public static void dailyResult()
         {
-
+            
         }
 
         public static void weeklyResult()
