@@ -64,6 +64,11 @@ namespace Z
         public bool PluggedInStatus;
         public double Weight = 1.0;
         public List<string> ProcessList = new List<string>();
+
+        public bool AlmostSame(ApplicationInstance Item)
+        {
+            return LastUsedApplication == Item.LastUsedApplication && SecondLastUsedApplication == Item.SecondLastUsedApplication && NetworkStatus == Item.NetworkStatus && PluggedInStatus == Item.PluggedInStatus;
+        }
     }
 
     class ApplicationInstances
