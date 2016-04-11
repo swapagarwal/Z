@@ -37,11 +37,13 @@ namespace Z
             dataGridView1.DefaultCellStyle.SelectionBackColor = dataGridView1.DefaultCellStyle.BackColor;
             dataGridView1.DefaultCellStyle.SelectionForeColor = dataGridView1.DefaultCellStyle.ForeColor;
             dataGridView1.CellClick += new DataGridViewCellEventHandler(dataGridView1_CellClick);
+
+            DisplayPredictions();
         }
 
         private void dataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
         {
-            string ApplicationName = dataGridView1.Rows[e.RowIndex].Cells[0].Value as string;
+            KeyValuePair<string, double> ClickedApplication = DisplayedResults[e.RowIndex];
             List<KeyValuePair<string, double>> DemoteList = new List<KeyValuePair<string, double>>();
 
             if (application_searcher.Text == "" && e.RowIndex > 0)
@@ -52,7 +54,7 @@ namespace Z
                 }
             }
 
-            LearningTools.ProcessApplication(ApplicationName, DemoteList);
+            LearningTools.ProcessApplication(ClickedApplication, DemoteList);
         }
 
         private void ProcessData(object source, ElapsedEventArgs e)
@@ -62,20 +64,25 @@ namespace Z
             BasicTools.GetTopWindowName();
         }
         
+        private void DisplayPredictions()
+        {
+            DisplayedResults = LearningTools.GetApplicationPredictions();
+
+            List<string> Applications = DisplayedResults.Select(x => x.Key).ToList();
+            foreach (string ApplicationName in Applications)
+            {
+                dataGridView1.Rows.Add();
+                dataGridView1.Rows[dataGridView1.RowCount - 1].Cells[0].Value = ApplicationName;
+            }
+        }
+
         private void application_searcher_TextChanged(object sender, EventArgs e)
         {
             dataGridView1.Rows.Clear();
 
             if (application_searcher.Text == "")
             {
-                DisplayedResults = LearningTools.GetApplicationPredictions();
-
-                List<string> Applications = DisplayedResults.Select(x => x.Key).ToList();
-                foreach (string ApplicationName in Applications)
-                {
-                    dataGridView1.Rows.Add();
-                    dataGridView1.Rows[dataGridView1.RowCount - 1].Cells[0].Value = ApplicationName;
-                }
+                DisplayPredictions();
             }
             else
             {

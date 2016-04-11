@@ -131,7 +131,7 @@ namespace Z
             WriteToFile();
         }
 
-        private void ReinforcedLearning(KeyValuePair<string, double> OpenedApplicationName, List<KeyValuePair<string, double>> ApplicationsDemoteList, ApplicationInstance ApplicationSnapshot)
+        public void ReinforcedLearning(KeyValuePair<string, double> OpenedApplicationName, List<KeyValuePair<string, double>> ApplicationsDemoteList, ApplicationInstance ApplicationSnapshot)
         {
             List<double> Factors = new List<double>();
             foreach (KeyValuePair<string, double> DemotedApplication in ApplicationsDemoteList)

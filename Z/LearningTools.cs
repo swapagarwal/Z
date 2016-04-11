@@ -44,14 +44,15 @@ namespace Z
             return ApplicationData.PredictApplications(GetApplicationSnapShot());
         }
 
-        public static void ProcessApplication(string ApplicationName, List<KeyValuePair<string, double>> DemoteList)
+        public static void ProcessApplication(KeyValuePair<string, double> ClickedApplication, List<KeyValuePair<string, double>> DemoteList)
         {
+            string ApplicationName = ClickedApplication.Key;
             ApplicationInstance ApplicationSnapshot = GetApplicationSnapShot();
             ApplicationData.AddApplicationInstance(ApplicationName, ApplicationSnapshot);
 
             if (DemoteList.Count > 0)
             {
-                ApplicationData.ReinforcedLearning(ApplicationName, DemoteList, ApplicationSnapshot);
+                ApplicationData.ReinforcedLearning(ClickedApplication, DemoteList, ApplicationSnapshot);
             }
 
             UserApplications.StartApplication(ApplicationName);
