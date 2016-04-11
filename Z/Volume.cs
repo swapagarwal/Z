@@ -110,6 +110,10 @@ namespace Z
         private bool Dirty = false;
         private DateTime LastUserActivity = DateTime.MinValue;
         private static int Threshold = 1 * 60;
+        private static double MinTimeOfDayWeight = 0.001;
+        private static double MaxTimeOfDayWeight = 1.0;
+        private static double MinTimeWeight = 0.001;
+        private static double MaxTimeWeight = 1.0;
 
         private void ReinforcedLearning(VolumeInstance Item)
         {
@@ -117,12 +121,11 @@ namespace Z
 
             foreach(VolumeInstance Instance in VolumeInstanceList)
             {
-                double val = Math.Abs(Instance.TimeStamp.TimeOfDay.Subtract(Item.TimeStamp.TimeOfDay).TotalSeconds);
-                Factors.Add(Math.Pow(Math.Max(1, Math.Min(val, 86400 - val)), 2));
+                double val = Math.Abs(Instance.TimeStamp.TimeOfDay.Subtract(Item.TimeStamp.TimeOfDay).TotalHours);
+                Factors.Add(Math.Pow(Math.Min(val, 24 - val), 2));
             }
 
-            double ratio = 144.0 / Factors.Max();
-            Factors = Factors.Select(x => Math.Exp(-x * ratio)).ToList();
+            Factors = Factors.Select(x => Math.Exp(-x)).ToList();
 
             double MaxWeight = 0;
             int i = 0;
@@ -145,32 +148,38 @@ namespace Z
         private List<double> GetTimeOfDayDifferenceWeights(VolumeInstance Item)
         {
             List<double> Weights = new List<double>();
+            // y = c - m * x
+            double MaxTimeDifference = 12; // hours
+            double slope = (MaxTimeOfDayWeight - MinTimeOfDayWeight) / MaxTimeDifference;
 
             foreach (VolumeInstance Instance in VolumeInstanceList)
             {
-                double val = Math.Abs(Instance.TimeStamp.TimeOfDay.Subtract(Item.TimeStamp.TimeOfDay).TotalSeconds);
-                Weights.Add(1.0 / (Math.Max(1, Math.Min(val, 86400 - val))));
+                double val = Math.Abs(Instance.TimeStamp.TimeOfDay.Subtract(Item.TimeStamp.TimeOfDay).TotalHours);
+                Weights.Add(MaxTimeOfDayWeight - slope * Math.Min(val, 24 - val));
             }
 
             double ratio = 1.0 / Weights.Max();
             Weights = Weights.Select(x => x * ratio).ToList();
+            Debug.Assert(Weights.TrueForAll(x => x > 0 && x <= 1));
             return Weights;
         }
 
         private List<double> GetTimeDifferenceWeights(VolumeInstance Item)
         {
             List<double> Weights = new List<double>();
+            // y = c - m * x * x
+            double MaxTimeDifference = 30; // days
+            double slope = (MaxTimeWeight - MinTimeWeight) / Math.Pow(MaxTimeDifference, 2);
 
             foreach (VolumeInstance Instance in VolumeInstanceList)
             {
-                double val = Math.Abs(Item.TimeStamp.Subtract(Instance.TimeStamp).TotalSeconds);
-                Weights.Add(val);
+                double val = Math.Abs(Item.TimeStamp.Subtract(Instance.TimeStamp).TotalDays);
+                Weights.Add(MaxTimeWeight - slope * Math.Pow(val, 2));
             }
-
-            Weights = Weights.Select(x => 1.0/Math.Log(Math.Max(Math.E, x))).ToList();
+            
             double ratio = 1.0 / Weights.Max();
             Weights = Weights.Select(x => x * ratio).ToList();
-
+            Debug.Assert(Weights.TrueForAll(x => x > 0 && x <= 1));
             return Weights;
         }
 
