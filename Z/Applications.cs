@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -55,19 +57,19 @@ namespace Z
 
     class ApplicationInstance
     {
-        string LastUsedApplication;
-        DateTime TimeStamp = DateTime.MinValue;
-        bool NetworkStatus;
-        bool PluggedInStatus;
-        int N = 3; // ngram
-        List<string> ApplicationHistory = new List<string>();
-        double Weight = 1.0;
-        HashSet<string> ProcessList = new HashSet<string>();
+        public string LastUsedApplication;
+        public DateTime TimeStamp = DateTime.MinValue;
+        public bool NetworkStatus;
+        public bool PluggedInStatus;
+        public int N = 3; // ngram
+        public List<string> ApplicationHistory = new List<string>();
+        public double Weight = 1.0;
+        public HashSet<string> ProcessList = new HashSet<string>();
     }
 
     class ApplicationInstances
     {
-        private List<ApplicationInstance> ApplicationInstanceList = new List<ApplicationInstance>();
+        public List<ApplicationInstance> ApplicationInstanceList = new List<ApplicationInstance>();
 
         public void AddApplicationInstance(ApplicationInstance Item)
         {
@@ -78,16 +80,133 @@ namespace Z
     class ApplicationModel
     {
         // Map application name to system states when it was started
-        private Dictionary<string, ApplicationInstances> ApplicationMap = new Dictionary<string, ApplicationInstances>();
+        private Dictionary<string, ApplicationInstances> ApplicationHistoryData = new Dictionary<string, ApplicationInstances>();
+        public string FileName = Environment.ExpandEnvironmentVariables("%USERPROFILE%\\application_data.dat");
 
+        public ApplicationModel()
+        {
+            ReadFromFile();
+        }
+
+        public void WriteToFile()
+        {
+            Stream FileStream = File.Open(FileName, FileMode.Truncate);
+            BinaryFormatter Serializer = new BinaryFormatter();
+            try
+            {
+                Serializer.Serialize(FileStream, ApplicationHistoryData);
+            }
+            catch (SerializationException e)
+            {
+                Console.WriteLine("Failed to serialize. Reason: " + e.Message);
+                throw;
+            }
+            finally
+            {
+                FileStream.Close();
+            }
+        }
+
+        public void ReadFromFile()
+        {
+            Stream FileStream = File.Open(FileName, FileMode.OpenOrCreate);
+            BinaryFormatter Serializer = new BinaryFormatter();
+            try
+            {
+                ApplicationHistoryData = Serializer.Deserialize(FileStream) as Dictionary<string, ApplicationInstances>;
+            }
+            catch
+            {
+                Console.WriteLine("Failed to deserialize!");
+                ApplicationHistoryData = new Dictionary<string, ApplicationInstances>();
+            }
+            finally
+            {
+                FileStream.Close();
+            }
+        }
+        
         public void AddApplicationInstance(string Application, ApplicationInstance Item)
         {
-            if(!ApplicationMap.ContainsKey(Application))
+            if(!ApplicationHistoryData.ContainsKey(Application))
             {
-                ApplicationMap.Add(Application, new ApplicationInstances());
+                ApplicationHistoryData.Add(Application, new ApplicationInstances());
             }
 
-            ApplicationMap[Application].AddApplicationInstance(Item);
+            ApplicationHistoryData[Application].AddApplicationInstance(Item);
+        }
+
+        public List<string> PredictApplications(ApplicationInstance Item) // Get Applications
+        {
+            Dictionary<string, double> CandidateApplications = new Dictionary<string, double>();
+            Dictionary<string, string> InstalledApplications = new InstalledApplicationList().ApplicationPaths;
+            Dictionary<string, int> ApplicationLastUsedCount = new Dictionary<string, int>();
+            Dictionary<string, int> ApplicationNetworkCount = new Dictionary<string, int>();
+            Dictionary<string, int> ApplicationPluggedInCount = new Dictionary<string, int>();
+            Dictionary<string, int> TotalLastUsedCount = new Dictionary<string, int>();
+            Dictionary<bool, int> TotalNetworkCount = new Dictionary<bool, int>();
+            Dictionary<bool, int> TotalPluggedInCount = new Dictionary<bool, int>();
+
+            foreach (KeyValuePair<string, ApplicationInstances> entry in ApplicationHistoryData)
+            {
+                string ApplicationName = entry.Key;
+                ApplicationInstances ApplicationHistory = entry.Value;
+                foreach (ApplicationInstance Instance in ApplicationHistory.ApplicationInstanceList)
+                {
+                    int count;
+                    string LastUsedApplication = Instance.LastUsedApplication;
+                    bool NetworkStatus = Instance.NetworkStatus;
+                    bool PluggedInStatus = Instance.PluggedInStatus;
+
+                    string ApplicationLastUsedKey = ApplicationName + ", " + LastUsedApplication;
+                    string ApplicationNetworkKey = ApplicationName + ", " + NetworkStatus;
+                    string ApplicationPluggedInKey = ApplicationName + ", " + PluggedInStatus;
+
+                    ApplicationLastUsedCount.TryGetValue(ApplicationLastUsedKey, out count);
+                    ApplicationLastUsedCount[ApplicationLastUsedKey] = count + 1;
+
+                    ApplicationNetworkCount.TryGetValue(ApplicationNetworkKey, out count);
+                    ApplicationNetworkCount[ApplicationNetworkKey] = count + 1;
+
+                    ApplicationPluggedInCount.TryGetValue(ApplicationPluggedInKey, out count);
+                    ApplicationPluggedInCount[ApplicationPluggedInKey] = count + 1;
+
+                    TotalLastUsedCount.TryGetValue(LastUsedApplication, out count);
+                    TotalLastUsedCount[LastUsedApplication] = count + 1;
+                    
+                    TotalNetworkCount.TryGetValue(NetworkStatus, out count);
+                    TotalNetworkCount[NetworkStatus] = count + 1;
+
+                    TotalPluggedInCount.TryGetValue(PluggedInStatus, out count);
+                    TotalPluggedInCount[PluggedInStatus] = count + 1;
+                }
+            }
+
+            foreach (string ApplicationName in InstalledApplications.Keys)
+            {
+                double probability = 1.0;
+                int ab, b;
+
+                string ApplicationLastUsedKey = ApplicationName + ", " + Item.LastUsedApplication;
+                string ApplicationNetworkKey = ApplicationName + ", " + Item.NetworkStatus;
+                string ApplicationPluggedInKey = ApplicationName + ", " + Item.PluggedInStatus;
+
+                ApplicationLastUsedCount.TryGetValue(ApplicationLastUsedKey, out ab);
+                TotalLastUsedCount.TryGetValue(Item.LastUsedApplication, out b);
+                probability *= (b == 0) ? (1.0) : (ab / b);
+
+                ApplicationNetworkCount.TryGetValue(ApplicationNetworkKey, out ab);
+                TotalNetworkCount.TryGetValue(Item.NetworkStatus, out b);
+                probability *= (b == 0) ? (1.0) : (ab / b);
+
+                ApplicationPluggedInCount.TryGetValue(ApplicationPluggedInKey, out ab);
+                TotalPluggedInCount.TryGetValue(Item.PluggedInStatus, out b);
+                probability *= (b == 0) ? (1.0) : (ab / b);
+
+                CandidateApplications.Add(ApplicationName, probability);
+            }
+
+            return CandidateApplications.ToList().OrderBy(x => x.Value).ToList().Select(x => x.Key).ToList();
         }
     }
 }
