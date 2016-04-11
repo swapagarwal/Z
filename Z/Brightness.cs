@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
@@ -151,7 +152,7 @@ namespace Z
     class BrightnessModel
     {
         private Dictionary<string, BrightnessHistory> BrightnessHistoryData = new Dictionary<string, BrightnessHistory>();
-        public string FileName = Environment.ExpandEnvironmentVariables("%USERPROFILE%\\brightness_data.dat");
+        public string FileName = Environment.ExpandEnvironmentVariables("brightness_data.dat");
 
         public BrightnessModel()
         {
@@ -160,39 +161,19 @@ namespace Z
 
         public void WriteToFile()
         {
-            Stream FileStream = File.Open(FileName, FileMode.Truncate);
-            BinaryFormatter Serializer = new BinaryFormatter();
-            try
-            {
-                Serializer.Serialize(FileStream, BrightnessHistoryData);
-            }
-            catch(SerializationException e)
-            {
-                Console.WriteLine("Failed to serialize. Reason: " + e.Message);
-                throw;
-            }
-            finally
-            {
-                FileStream.Close();
-            }
+            BasicTools.WriteToFile(FileName, BrightnessHistoryData);
         }
 
         public void ReadFromFile()
         {
-            Stream FileStream = File.Open(FileName, FileMode.OpenOrCreate);
-            BinaryFormatter Serializer = new BinaryFormatter();
             try
             {
-                BrightnessHistoryData = Serializer.Deserialize(FileStream) as Dictionary<string, BrightnessHistory>;
+                BrightnessHistoryData = BasicTools.ReadFromFile(FileName) as Dictionary<string, BrightnessHistory>;
             }
-            catch
+            catch (Exception ex)
             {
-                Console.WriteLine("Failed to deserialize!");
+                Debug.WriteLine(ex.Message);
                 BrightnessHistoryData = new Dictionary<string, BrightnessHistory>();
-            }
-            finally
-            {
-                FileStream.Close();
             }
         }
 
