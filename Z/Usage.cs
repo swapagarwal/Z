@@ -18,6 +18,8 @@ namespace Z
         static int weekly = 0;
         static Dictionary<string, int> All_Program = new Dictionary<string, int>();
         static Queue<Dictionary<string, int>> All_Data = new Queue<Dictionary<string, int>>();
+        static Queue<Dictionary<string, int>> All_Data_Daily = new Queue<Dictionary<string, int>>();
+        static Queue<Dictionary<string, int>> All_Data_weekly = new Queue<Dictionary<string, int>>();
         static Dictionary<string, int> Prediction_Data = new Dictionary<string, int>();
         static Dictionary<string, int> fileData = new Dictionary<string, int>();
         static string FileName = "usageData.txt";
@@ -73,7 +75,17 @@ namespace Z
             {
                 All_Data.Dequeue();
             }
+            if(All_Data_Daily.Count == queueSize * 24)
+            {
+                All_Data_Daily.Dequeue();
+            }
+            if(All_Data_weekly.Count== queueSize * 168)
+            {
+                All_Data_weekly.Dequeue();
+            }
             All_Data.Enqueue(All_Program);
+            All_Data_Daily.Enqueue(All_Program);
+            All_Data_weekly.Enqueue(All_Program);
             BasicTools.CreateChart(All_Program, ImageName+weekly+daily+".png");
             showPrediction();
             daily++;
