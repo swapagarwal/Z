@@ -13,7 +13,8 @@ namespace Z
     public partial class Form1 : Form
     {
         InstalledApplicationList UserApplications = new InstalledApplicationList();
-        
+        List<KeyValuePair<string, double>> DisplayedResults = new List<KeyValuePair<string, double>>();
+
         int UsageCounter = 0;
 
         public Form1()
@@ -41,13 +42,13 @@ namespace Z
         private void dataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
         {
             string ApplicationName = dataGridView1.Rows[e.RowIndex].Cells[0].Value as string;
-            List<string> DemoteList = new List<string>();
+            List<KeyValuePair<string, double>> DemoteList = new List<KeyValuePair<string, double>>();
 
             if (application_searcher.Text == "" && e.RowIndex > 0)
             {
                 for (int i = 0; i < e.RowIndex; i++)
                 {
-                    DemoteList.Add(dataGridView1.Rows[i].Cells[0].Value as string);
+                    DemoteList.Add(DisplayedResults[i]);
                 }
             }
 
@@ -67,14 +68,19 @@ namespace Z
 
             if (application_searcher.Text == "")
             {
-                /*
-                * Sort by prediction
-                * 
-                */
+                DisplayedResults = LearningTools.GetApplicationPredictions();
+
+                List<string> Applications = DisplayedResults.Select(x => x.Key).ToList();
+                foreach (string ApplicationName in Applications)
+                {
+                    dataGridView1.Rows.Add();
+                    dataGridView1.Rows[dataGridView1.RowCount - 1].Cells[0].Value = ApplicationName;
+                }
             }
             else
             {
                 List<string> Applications = UserApplications.SearchApplications(application_searcher.Text);
+                DisplayedResults.Clear();
 
                 foreach (string ApplicationName in Applications)
                 {

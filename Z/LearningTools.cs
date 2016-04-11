@@ -28,6 +28,7 @@ namespace Z
         public static ApplicationInstance GetApplicationSnapShot()
         {
             ApplicationInstance ApplicationSnapShot = new ApplicationInstance();
+
             ApplicationSnapShot.LastUsedApplication = LastUsedApplication;
             ApplicationSnapShot.SecondLastUsedApplication = SecondLastUsedApplication;
             ApplicationSnapShot.NetworkStatus = BasicTools.CheckNetworkStatus();
@@ -38,7 +39,12 @@ namespace Z
             return ApplicationSnapShot;
         }
 
-        public static void ProcessApplication(string ApplicationName, List<string> DemoteList)
+        public static List<KeyValuePair<string, double>> GetApplicationPredictions()
+        {
+            return ApplicationData.PredictApplications(GetApplicationSnapShot());
+        }
+
+        public static void ProcessApplication(string ApplicationName, List<KeyValuePair<string, double>> DemoteList)
         {
             ApplicationInstance ApplicationSnapshot = GetApplicationSnapShot();
             ApplicationData.AddApplicationInstance(ApplicationName, ApplicationSnapshot);
