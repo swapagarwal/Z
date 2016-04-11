@@ -14,7 +14,9 @@ namespace Z
     {
         InstalledApplicationList UserApplications = new InstalledApplicationList();
         ApplicationModel ApplicationData = new ApplicationModel();
-        byte[] bLevels; //array of valid level values
+        string LastUsedApplication = "";
+        string SecondLastUsedApplication = ""; 
+        byte[] bLevels;
 
         public Form1()
         {
@@ -28,9 +30,8 @@ namespace Z
             ProcessTimer.Interval = Interval;
             ProcessTimer.Start();
 
-            // attach event handler for Click event 
-            // (assuming ButtonClickHandler is an existing method in the class)
-            
+            bLevels = GetBrightnessLevels();
+
             dataGridView1.DefaultCellStyle.SelectionBackColor = dataGridView1.DefaultCellStyle.BackColor;
             dataGridView1.DefaultCellStyle.SelectionForeColor = dataGridView1.DefaultCellStyle.ForeColor;
             dataGridView1.CellClick += new DataGridViewCellEventHandler(dataGridView1_CellClick);
@@ -38,15 +39,27 @@ namespace Z
 
         private void dataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
         {
-            UserApplications.StartApplication(dataGridView1.Rows[e.RowIndex].Cells[0].Value as string);
+            string ApplicationName = dataGridView1.Rows[e.RowIndex].Cells[0].Value as string;
+
+            ApplicationInstance SystemState = new ApplicationInstance();
+            SystemState.LastUsedApplication = LastUsedApplication;
+            SystemState.SecondLastUsedApplication = SecondLastUsedApplication;
+            SystemState.NetworkStatus = BasicTools.CheckNetworkStatus();
+            SystemState.PluggedInStatus = BasicTools.CheckPluggedIn();
+            SystemState.TimeStamp = DateTime.Now;
+            SystemState.ProcessList = BasicTools.GetProcessList();
+            ApplicationData.AddApplicationInstance(ApplicationName, SystemState);
+
+            UserApplications.StartApplication(ApplicationName);
+            SecondLastUsedApplication = LastUsedApplication;
+            LastUsedApplication = ApplicationName;
         }
 
         private void ProcessData(object source, ElapsedEventArgs e)
         {
             LearningTools.ProcessVolume(volume_mode.Checked);
             LearningTools.ProcessBrightness(brightness_mode.Checked);
-            bLevels = GetBrightnessLevels();
-            //textBox2.Text = GetBrightness().ToString();
+            BasicTools.GetTopWindowName();
         }
 
         private void SetVolume(int level)

@@ -58,13 +58,12 @@ namespace Z
     class ApplicationInstance
     {
         public string LastUsedApplication;
+        public string SecondLastUsedApplication;
         public DateTime TimeStamp = DateTime.MinValue;
         public bool NetworkStatus;
         public bool PluggedInStatus;
-        public int N = 3; // ngram
-        public List<string> ApplicationHistory = new List<string>();
         public double Weight = 1.0;
-        public HashSet<string> ProcessList = new HashSet<string>();
+        public List<string> ProcessList = new List<string>();
     }
 
     class ApplicationInstances

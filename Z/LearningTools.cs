@@ -10,6 +10,8 @@ using System.Windows.Forms;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Web.UI.DataVisualization.Charting;
+using System.Net;
+using System.Net.NetworkInformation;
 
 namespace Z
 {
@@ -122,7 +124,7 @@ namespace Z
                 }
                 else
                 {
-                    MessageBox.Show("Something happened!");
+                    Debug.WriteLine("Something happened!");
                 }
             }
         }
@@ -214,7 +216,28 @@ namespace Z
     static class BasicTools
     {
         public static string FolderPath = Environment.ExpandEnvironmentVariables("%USERPROFILE%\\Z\\");
-        
+
+        public static bool CheckNetworkStatus()
+        {
+            return NetworkInterface.GetIsNetworkAvailable();
+        }
+
+        public static bool CheckPluggedIn()
+        {
+            return (SystemInformation.PowerStatus.PowerLineStatus == PowerLineStatus.Online);
+        }
+
+        public static List<string> GetProcessList()
+        {
+            List<string> ProcessList = new List<string>();
+
+            /*
+            *  Complete This
+            */
+
+            return ProcessList;
+        }
+
         public static void RecursiveDirectoryrSearch(string DirectoryPath, ref List<string> FileList)
         {
             try
@@ -287,7 +310,8 @@ namespace Z
             GetWindowThreadProcessId(hWnd, out pid);
 
             Process TopWindowProcess = Process.GetProcessById((int)pid);
-            
+            Process TopWindowProcessTest = Process.GetCurrentProcess();
+
             return TopWindowProcess.MainModule.FileVersionInfo.FileDescription; 
         }
 
