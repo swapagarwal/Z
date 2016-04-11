@@ -400,6 +400,7 @@ namespace Z
             int Height = 1500;
             int Width = 2100;
             int FontSize = 28;
+            string CollectedThresholdPercent = "8";
 
             Font ChartFont = new Font("Arial", FontSize);
 
@@ -414,6 +415,11 @@ namespace Z
             List<int> DataCount = PlotData.Values.ToList();
             
             chart.Series.Add(new Series("Data"));
+            chart.Series["Data"].SetCustomProperty("CollectedThresholdUsePercent", "true");
+            chart.Series["Data"].SetCustomProperty("CollectedThreshold", CollectedThresholdPercent);
+            chart.Series["Data"].SetCustomProperty("CollectedLabel", "Others");
+
+
             chart.Series["Data"].ChartType = SeriesChartType.Pie;
             chart.Series["Data"].Font = ChartFont;
             chart.Series["Data"]["PieLabelStyle"] = "Outside";
