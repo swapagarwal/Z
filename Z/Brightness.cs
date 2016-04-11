@@ -32,17 +32,20 @@ namespace Z
         private bool Dirty = false;
         private DateTime LastUserActivity = DateTime.MinValue;
         private static int Threshold = 30; // seconds
+        private static double MinTimeOfDayWeight = 0.001;
+        private static double MaxTimeOfDayWeight = 1.0;
+        private static double MinTimeWeight = 0.001;
+        private static double MaxTimeWeight = 1.0;
 
         private void ReinforcementLearning(ApplicationBrightness Item)
         {
             List<double> Factors = new List<double>();
             foreach (ApplicationBrightness Instance in ApplicationBrightnessList)
             {
-                double val = Math.Abs(Item.TimeStamp.TimeOfDay.Subtract(Instance.TimeStamp.TimeOfDay).TotalSeconds);
-                Factors.Add(Math.Pow(Math.Max(1, Math.Min(val, 86400 - val)), 2));
+                double val = Math.Abs(Item.TimeStamp.TimeOfDay.Subtract(Instance.TimeStamp.TimeOfDay).TotalHours);
+                Factors.Add(Math.Pow(Math.Min(val, 24 - val), 2));
             }
-            double ratio = 144.0 / Factors.Max();
-            Factors = Factors.Select(x => Math.Exp(-x * ratio)).ToList();
+            Factors = Factors.Select(x => Math.Exp(-x)).ToList();
             double MaxWeight = 0;
             int i = 0;
             foreach (ApplicationBrightness Instance in ApplicationBrightnessList)
@@ -63,26 +66,34 @@ namespace Z
         private List<double> GetTimeOfDayDifferenceWeights(ApplicationBrightness Item)
         {
             List<double> Weights = new List<double>();
+            // y = c - m * x
+            double MaxTimeDifference = 12; // hours
+            double slope = (MaxTimeOfDayWeight - MinTimeOfDayWeight) / MaxTimeDifference;
             foreach (ApplicationBrightness Instance in ApplicationBrightnessList)
             {
-                double val = Math.Abs(Item.TimeStamp.TimeOfDay.Subtract(Instance.TimeStamp.TimeOfDay).TotalSeconds);
-                Weights.Add(1.0 / Math.Max(1, Math.Min(val, 86400 - val)));
+                double val = Math.Abs(Item.TimeStamp.TimeOfDay.Subtract(Instance.TimeStamp.TimeOfDay).TotalHours);
+                Weights.Add(MaxTimeOfDayWeight - slope * Math.Min(val, 24 - val));
             }
             double ratio = 1.0 / Weights.Max();
             Weights = Weights.Select(x => x * ratio).ToList();
+            Debug.Assert(Weights.TrueForAll(x => x > 0 && x <= 1));
             return Weights;
         }
 
         private List<double> GetTimeDifferenceWeights(ApplicationBrightness Item)
         {
             List<double> Weights = new List<double>();
+            // y = c - m * x * x
+            double MaxTimeDifference = 30; // days
+            double slope = (MaxTimeWeight - MinTimeWeight) / Math.Pow(MaxTimeDifference, 2);
             foreach (ApplicationBrightness Instance in ApplicationBrightnessList)
             {
-                Weights.Add(Math.Abs(Item.TimeStamp.Subtract(Instance.TimeStamp).TotalSeconds));
+                double val = Math.Abs(Item.TimeStamp.Subtract(Instance.TimeStamp).TotalDays);
+                Weights.Add(MaxTimeWeight - slope * Math.Pow(val, 2));
             }
-            Weights = Weights.Select(x => 1.0 / Math.Log(Math.Max(Math.E, x))).ToList();
             double ratio = 1.0 / Weights.Max();
             Weights = Weights.Select(x => x * ratio).ToList();
+            Debug.Assert(Weights.TrueForAll(x => x > 0 && x <= 1));
             return Weights;
         }
 
