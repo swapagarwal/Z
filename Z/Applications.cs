@@ -55,6 +55,7 @@ namespace Z
         }
     }
 
+    [Serializable()]
     class ApplicationInstance
     {
         public string LastUsedApplication;
@@ -71,6 +72,7 @@ namespace Z
         }
     }
 
+    [Serializable()]
     class ApplicationInstances
     {
         public List<ApplicationInstance> ApplicationInstanceList = new List<ApplicationInstance>();
@@ -126,6 +128,7 @@ namespace Z
             }
 
             ApplicationHistoryData[Application].AddApplicationInstance(Item);
+            WriteToFile();
         }
 
         private void ReinforcedLearning(KeyValuePair<string, double> OpenedApplicationName, List<KeyValuePair<string, double>> ApplicationsDemoteList, ApplicationInstance ApplicationSnapshot)
@@ -279,6 +282,7 @@ namespace Z
                 CandidateApplications.Add(ApplicationName, probability);
             }
 
+            WriteToFile();
             return CandidateApplications.ToList().OrderBy(x => -x.Value).ToList();
         }
     }
