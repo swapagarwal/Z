@@ -12,10 +12,12 @@ namespace Z
         static string name = "";
         static string text = "";
         static int duration = 0;
+        static int queueSize = 10;
         static Dictionary<string, int> All_Program = new Dictionary<string, int>();
         static Queue<Dictionary<string, int>> All_Data = new Queue<Dictionary<string, int>>();
-        static int queueSize = 10;
         static Dictionary<string, int> Prediction_Data = new Dictionary<string, int>();
+        static Dictionary<string, int> fileData = new Dictionary<string, int>();
+        static string FileName = "usageData.txt";
 
         public static void CurrentApplication()
         {
@@ -32,17 +34,19 @@ namespace Z
             }
             else
             {
-                if (!All_Program.ContainsKey(name))
+                try
                 {
-                    All_Program.Add(name, duration);
+                    if (!All_Program.ContainsKey(name))
+                        All_Program.Add(name, duration);
+                    else
+                        All_Program[name] += duration;
                 }
-                else
+                catch(Exception ex)
                 {
-                    All_Program[name] += duration;
+                    Console.WriteLine(ex.Message);
                 }
+                
 
-                //Console.WriteLine(name +  "   " + All_Program[name]);
-                //Console.WriteLine(name + "   " + duration);
                 duration = 0;
                 name = curr_name;
                 text = curr_text;
@@ -96,6 +100,24 @@ namespace Z
             foreach(var i in Prediction_Data)
             {
                 Console.WriteLine(i.Key + "   " + i.Value);
+            }
+        }
+
+        public static void WriteToFile()
+        {
+            BasicTools.WriteToFile(FileName, All_Program);
+        }
+
+        public static void ReadFromFile()
+        {
+            try
+            {
+                fileData = BasicTools.ReadFromFile(FileName) as Dictionary<string, int>;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                fileData = new Dictionary<string, int>();
             }
         }
     }
