@@ -25,6 +25,7 @@ namespace Z
         static Dictionary<string, int> fileData = new Dictionary<string, int>();
         static string FileName = "usageData.txt";
         static string ImageName = "Hourly-";
+        static string t = "";
 
         public static void CurrentApplication()
         {
@@ -89,7 +90,8 @@ namespace Z
             All_Data.Enqueue(All_Program);
             All_Data_Daily.Enqueue(All_Program);
             All_Data_weekly.Enqueue(All_Program);
-            BasicTools.CreateChart(All_Program, ImageName + DateTime.Now.ToFileTime().ToString() +".png");
+            t = DateTime.Now.ToFileTime().ToString();
+            BasicTools.CreateChart(All_Program, ImageName + t +".png");
             showPrediction();
             daily++;
             weekly++;
@@ -131,13 +133,14 @@ namespace Z
                 foreach (var j in i)
                 {
                     if (!Prediction_Data.ContainsKey(j.Key))
-                        Prediction_Data.Add(j.Key, 0);
+                        Prediction_Data.Add(j.Key, j.Value);
                     else
                         Prediction_Data[j.Key] += (int)(((double)j.Value)/val);
+                        //Prediction_Data[j.Key] += j.Value;
                 }
             }
             Console.WriteLine("Number of ELement in prediction data  " + Prediction_Data.Count);
-            BasicTools.CreateChart(Prediction_Data);
+            BasicTools.CreateChart(Prediction_Data,"prediction" + t + ".png");
             foreach(var i in Prediction_Data)
             {
                 Console.WriteLine(i.Key + "   " + i.Value);
