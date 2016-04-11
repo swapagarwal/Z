@@ -9,9 +9,10 @@ using System.Text;
 using System.Windows.Forms;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
-using System.Web.UI.DataVisualization.Charting;
+using System.Windows.Forms.DataVisualization.Charting;
 using System.Net;
 using System.Net.NetworkInformation;
+using System.Drawing;
 
 namespace Z
 {
@@ -396,25 +397,32 @@ namespace Z
 
         public static void CreateChart(Dictionary<string, int> PlotData, string FileName = "data.png")
         {
+            int Height = 1500;
+            int Width = 2100;
+            int FontSize = 28;
+
+            Font ChartFont = new Font("Arial", FontSize);
+
             string FilePath = Environment.ExpandEnvironmentVariables(FolderPath + FileName);
             Chart chart = new Chart();
-            chart.ChartAreas.Add(new ChartArea());
             
+            chart.ChartAreas.Add(new ChartArea());
+            chart.Width = Width;
+            chart.Height = Height;
+
             List<string> Labels = PlotData.Keys.ToList();
             List<int> DataCount = PlotData.Values.ToList();
             
             chart.Series.Add(new Series("Data"));
             chart.Series["Data"].ChartType = SeriesChartType.Pie;
+            chart.Series["Data"].Font = ChartFont;
             chart.Series["Data"]["PieLabelStyle"] = "Outside";
             chart.Series["Data"]["PieLineColor"] = "Black";
             chart.Series["Data"].Points.DataBindXY(Labels, DataCount);
 
-            MemoryStream ms = new MemoryStream();
-            chart.SaveImage(ms, ChartImageFormat.Png);
-            FileStream f = new FileStream(FilePath, FileMode.Create);
-            ms.WriteTo(f);
-            f.Close();
-            ms.Close();
+            Bitmap bmp = new Bitmap(Width, Height);
+            chart.DrawToBitmap(bmp, new Rectangle(0, 0, Width, Height));
+            bmp.Save(FilePath);
         }
     }
 }

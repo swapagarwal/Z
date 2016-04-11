@@ -29,7 +29,7 @@ namespace Z
         {
             string curr_name = BasicTools.GetTopWindowName();
             string curr_text = BasicTools.GetTopWindowText();
-            if (name.Equals(""))
+            if (name == "" || name == null)
             {
                 name = curr_name;
                 text = curr_text;
@@ -46,6 +46,10 @@ namespace Z
                         All_Program.Add(name, duration);
                     else
                         All_Program[name] += duration;
+
+
+                    name = curr_name;
+                    text = curr_text;
                 }
                 catch(Exception ex)
                 {
@@ -53,8 +57,6 @@ namespace Z
                 }
                 
                 duration = 0;
-                name = curr_name;
-                text = curr_text;
             }
         }
 

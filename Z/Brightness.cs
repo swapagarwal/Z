@@ -196,6 +196,12 @@ namespace Z
         public void AddBrightness(ApplicationBrightness Item)
         {
             string Key = GetKey(Item);
+
+            if (Key == null)
+            {
+                return;
+            }
+
             if (!BrightnessHistoryData.ContainsKey(Key))
             {
                 BrightnessHistoryData.Add(Key, new BrightnessHistory());
