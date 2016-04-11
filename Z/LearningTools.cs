@@ -400,7 +400,7 @@ namespace Z
             int Height = 1500;
             int Width = 2100;
             int FontSize = 28;
-            string CollectedThresholdPercent = "8";
+            string CollectedThresholdPercent = "1.5";
 
             Font ChartFont = new Font("Arial", FontSize);
 
