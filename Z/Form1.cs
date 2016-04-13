@@ -38,7 +38,7 @@ namespace Z
             dataGridView1.DefaultCellStyle.SelectionForeColor = dataGridView1.DefaultCellStyle.ForeColor;
             dataGridView1.CellClick += new DataGridViewCellEventHandler(dataGridView1_CellClick);
 
-            DisplayPredictions();
+            DisplaySortedPredictions();
         }
 
         private void dataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
@@ -66,10 +66,7 @@ namespace Z
 
             LearningTools.ProcessApplication(ClickedApplication, DemoteList);
 
-            if (application_searcher.Text == "")
-            {
-                DisplayPredictions();
-            }
+            DisplaySortedPredictions();
         }
 
         private void ProcessData(object source, ElapsedEventArgs e)
@@ -78,15 +75,17 @@ namespace Z
             LearningTools.ProcessBrightness(brightness_mode.Checked);
             BasicTools.GetTopWindowName();
         }
-        
-        private void DisplayPredictions()
+
+        private void DisplaySortedPredictions()
         {
             dataGridView1.Rows.Clear();
             DisplayedResults = LearningTools.GetApplicationPredictions();
 
-            List<string> Applications = DisplayedResults.Select(x => x.Key).ToList();
-            foreach (string ApplicationName in Applications)
+            List<KeyValuePair<string, double>> Applications = UserApplications.SearchApplications(application_searcher.Text, LearningTools.GetApplicationPredictions());
+
+            foreach (KeyValuePair<string, double> Application in Applications)
             {
+                string ApplicationName = Application.Key;
                 dataGridView1.Rows.Add();
                 dataGridView1.Rows[dataGridView1.RowCount - 1].Cells[0].Value = ApplicationName;
             }
@@ -94,22 +93,7 @@ namespace Z
 
         private void application_searcher_TextChanged(object sender, EventArgs e)
         {
-            if (application_searcher.Text == "")
-            {
-                DisplayPredictions();
-            }
-            else
-            {
-                dataGridView1.Rows.Clear();
-                List<string> Applications = UserApplications.SearchApplications(application_searcher.Text);
-                DisplayedResults.Clear();
-                
-                foreach (string ApplicationName in Applications)
-                {
-                    dataGridView1.Rows.Add();
-                    dataGridView1.Rows[dataGridView1.RowCount - 1].Cells[0].Value = ApplicationName;
-                }
-            }
+            DisplaySortedPredictions();
         }
         
         public void DisplayUsage(object sender, EventArgs e)
