@@ -1,6 +1,6 @@
 ﻿namespace Z
 {
-    partial class Form1
+    partial class MainWindow
     {
         /// <summary>
         /// Required designer variable.
@@ -88,7 +88,7 @@
             this.Applications.Text = "";
             this.Applications.TrackVisitedState = false;
             // 
-            // Form1
+            // MainWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -97,8 +97,8 @@
             this.Controls.Add(this.application_searcher);
             this.Controls.Add(this.brightness_mode);
             this.Controls.Add(this.volume_mode);
-            this.Name = "Form1";
-            this.Text = "Form1";
+            this.Name = "MainWindow";
+            this.Text = "PC Assistant";
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
