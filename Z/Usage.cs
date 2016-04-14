@@ -146,7 +146,7 @@ namespace Z
                     {
                         All_program_weekly[j.Key] += (int)j.Value;
                     }
-                    BasicTools.CreateChart(All_Program, "Weekly-" + t + ".png");
+                    BasicTools.CreateChart( All_program_weekly , "Weekly-" + t + ".png");
                 }
             }
         }
@@ -165,7 +165,7 @@ namespace Z
                     {
                         All_program_monthly[j.Key] += (int)j.Value;
                     }
-                    BasicTools.CreateChart(All_Program, "Monthly-" + t + ".png");
+                    BasicTools.CreateChart( All_program_monthly , "Monthly-" + t + ".png");
                 }
             }
         }
@@ -192,17 +192,18 @@ namespace Z
                     }
                     else
                     {
-                        Prediction_Data[j.Key] += (int)(j.Value* Math.Log(val));
-                        totalData[j.Key] += (int)j.Value;
+                        //Prediction_Data[j.Key] += (int)(j.Value* Math.Log(val));
+                        totalData[j.Key] += (int)Math.Log(val);
                     }
                         
                 }
             }
-            
+            Console.WriteLine("testing");
             foreach(var i in totalData)
             {
                 if (totalData[i.Key] > 0)
                 {
+                    Console.WriteLine(i.Key + "   " + Prediction_Data[i.Key] + "  " + i.Value);
                     Prediction_Data[i.Key]/=totalData[i.Key];
                     //Console.WriteLine(i.Key + "   " + i.Value);
                 }
