@@ -98,12 +98,16 @@ namespace Z
         
         public void DisplayUsage(object sender, EventArgs e)
         {
+            if (UsageCounter == 0)
+            {
+                Usage.intialise();
+            }
             Usage.CurrentApplication();
             UsageCounter++;
-            if (UsageCounter == 10)
+            if (UsageCounter == 11)
             {
                 Usage.dailyResult();
-                UsageCounter = 0;
+                UsageCounter = 1;
             }
         }
     }

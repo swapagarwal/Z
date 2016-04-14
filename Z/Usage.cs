@@ -14,18 +14,37 @@ namespace Z
         static string name = "";
         static string text = "";
         static int duration = 0;
-        static int queueSize = 20;
+        static int queueSize = 100;
         static int monthly = 0;
         static int weekly = 0;
         static Dictionary<string, int> All_Program = new Dictionary<string, int>();
         static Queue<Dictionary<string, int>> All_Data = new Queue<Dictionary<string, int>>();
-        static Queue<Dictionary<string, int>> All_Data_Daily = new Queue<Dictionary<string, int>>();
         static Queue<Dictionary<string, int>> All_Data_weekly = new Queue<Dictionary<string, int>>();
+        static Queue<Dictionary<string, int>> All_Data_monthly = new Queue<Dictionary<string, int>>();
         static Dictionary<string, int> Prediction_Data = new Dictionary<string, int>();
-        static Dictionary<string, int> fileData = new Dictionary<string, int>();
+        static List<Dictionary<string, int>> fileData = new List<Dictionary<string, int>>();
         static string FileName = "usageData.txt";
         static string ImageName = "Daily-";
         static string t = "";
+
+        public static void intialise()
+        {
+            Console.WriteLine("reading from file");
+            for (int i = fileData.Count-1; i >= 0; i--)
+            {
+                if (fileData.Count - i >= queueSize * 7)
+                    break;
+                else
+                    All_Data_weekly.Enqueue(fileData[i]);
+            }
+            for (int i = fileData.Count-1; i >= 0; i--)
+            {
+                if (fileData.Count - i >= queueSize * 30)
+                    break;
+                else
+                    All_Data_monthly.Enqueue(fileData[i]);
+            }
+        }
 
         public static void CurrentApplication()
         {
@@ -75,23 +94,25 @@ namespace Z
             {
                 Console.WriteLine(k.Key + "   " + k.Value);
             }
-            if (All_Data.Count == queueSize)
+            if (All_Data.Count >= queueSize)
             {
                 All_Data.Dequeue();
             }
-            if(All_Data_Daily.Count == queueSize * 7)
-            {
-                All_Data_Daily.Dequeue();
-            }
-            if(All_Data_weekly.Count== queueSize * 30)
+            if(All_Data_weekly.Count >= queueSize * 7)
             {
                 All_Data_weekly.Dequeue();
             }
+            if(All_Data_monthly.Count >= queueSize * 30)
+            {
+                All_Data_monthly.Dequeue();
+            }
             All_Data.Enqueue(All_Program);
-            All_Data_Daily.Enqueue(All_Program);
             All_Data_weekly.Enqueue(All_Program);
+            All_Data_monthly.Enqueue(All_Program);
             t = DateTime.Now.ToFileTime().ToString();
             BasicTools.CreateChart(All_Program, ImageName + t +".png");
+            fileData.Add(All_Program);
+            WriteToFile();
             showPrediction();
             monthly++;
             weekly++;
@@ -100,7 +121,7 @@ namespace Z
                 weeklyResult();
                 weekly = 0;
             }
-            if(monthly == 7)
+            if(monthly == 30)
             {
                 monthlyResult();
                 monthly = 0;
@@ -111,6 +132,7 @@ namespace Z
         public static void weeklyResult()
         {
             
+
         }
 
         public static void monthlyResult()
@@ -166,19 +188,19 @@ namespace Z
 
         public static void WriteToFile()
         {
-            BasicTools.WriteToFile(FileName, All_Program);
+            BasicTools.WriteToFile(FileName, fileData);
         }
 
         public static void ReadFromFile()
         {
             try
             {
-                fileData = BasicTools.ReadFromFile(FileName) as Dictionary<string, int>;
+                fileData = BasicTools.ReadFromFile(FileName) as List<Dictionary<string, int>>;
             }
             catch (Exception ex)
             {
                 Debug.WriteLine(ex.Message);
-                fileData = new Dictionary<string, int>();
+                fileData = new List<Dictionary<string, int>>();
             }
         }
     }
