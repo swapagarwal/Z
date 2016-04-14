@@ -23,6 +23,7 @@ namespace Z
         static Queue<Dictionary<string, int>> All_Data_monthly = new Queue<Dictionary<string, int>>();
         static Dictionary<string, int> Prediction_Data = new Dictionary<string, int>();
         static List<Dictionary<string, int>> fileData = new List<Dictionary<string, int>>();
+
         static string FileName = "usageData.txt";
         static string ImageName = "Daily-";
         static string t = "";
@@ -132,7 +133,6 @@ namespace Z
         public static void weeklyResult()
         {
             
-
         }
 
         public static void monthlyResult()
@@ -157,7 +157,7 @@ namespace Z
                 {
                     if (!Prediction_Data.ContainsKey(j.Key))
                     {
-                        Prediction_Data.Add(j.Key, (int)(j.Value*Math.Log10(val)));
+                        Prediction_Data.Add(j.Key, (int)(j.Value*Math.Log(val)));
                         totalData.Add(j.Key, j.Value);
                     }
                     else
