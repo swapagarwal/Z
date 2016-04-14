@@ -24,7 +24,6 @@ namespace Z
             {
                 string ApplicationName = Path.GetFileNameWithoutExtension(FilePath);
 
-                // Take the first shortcut found
                 if (!ApplicationPaths.ContainsKey(ApplicationName))
                 {
                     ApplicationPaths.Add(ApplicationName, FilePath);
@@ -32,15 +31,16 @@ namespace Z
             }
         }
 
-        public List<string> SearchApplications(string substring)
+        public List<KeyValuePair<string, double>> SearchApplications(string substring, List<KeyValuePair<string, double>> ApplicationsToSearch)
         {
-            List<string> ApplicationList = new List<string>();
+            List<KeyValuePair<string, double>> ApplicationList = new List<KeyValuePair<string, double>>();
 
-            foreach(string ApplicationName in ApplicationPaths.Keys)
+            foreach(KeyValuePair<string, double> Application in ApplicationsToSearch)
             {
+                string ApplicationName = Application.Key;
                 if(ApplicationName.ToLower().Contains(substring.ToLower()))
                 {
-                    ApplicationList.Add(ApplicationName);
+                    ApplicationList.Add(Application);
                 }
             }
 
@@ -136,6 +136,11 @@ namespace Z
             List<double> Factors = new List<double>();
             foreach (KeyValuePair<string, double> DemotedApplication in ApplicationsDemoteList)
             {
+                if(!ApplicationHistoryData.ContainsKey(DemotedApplication.Key))
+                {
+                    continue;
+                }
+
                 ApplicationInstances ApplicationHistory = ApplicationHistoryData[DemotedApplication.Key];
                 foreach (ApplicationInstance Instance in ApplicationHistory.ApplicationInstanceList)
                 {
@@ -148,6 +153,11 @@ namespace Z
             int i = 0;
             foreach (KeyValuePair<string, double> DemotedApplication in ApplicationsDemoteList)
             {
+                if (!ApplicationHistoryData.ContainsKey(DemotedApplication.Key))
+                {
+                    continue;
+                }
+
                 ApplicationInstances ApplicationHistory = ApplicationHistoryData[DemotedApplication.Key];
                 foreach (ApplicationInstance Instance in ApplicationHistory.ApplicationInstanceList)
                 {
@@ -159,6 +169,7 @@ namespace Z
                     i++;
                 }
             }
+
             ApplicationInstances OpenedApplicationHistory = ApplicationHistoryData[OpenedApplicationName.Key];
             foreach (ApplicationInstance Instance in OpenedApplicationHistory.ApplicationInstanceList)
             {
