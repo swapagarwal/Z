@@ -18,6 +18,8 @@ namespace Z
         static int monthly = 0;
         static int weekly = 0;
         static Dictionary<string, int> All_Program = new Dictionary<string, int>();
+        static Dictionary<string, int> All_program_weekly = new Dictionary<string, int>();
+        static Dictionary<string, int> All_program_monthly = new Dictionary<string, int>();
         static Queue<Dictionary<string, int>> All_Data = new Queue<Dictionary<string, int>>();
         static Queue<Dictionary<string, int>> All_Data_weekly = new Queue<Dictionary<string, int>>();
         static Queue<Dictionary<string, int>> All_Data_monthly = new Queue<Dictionary<string, int>>();
@@ -132,12 +134,40 @@ namespace Z
 
         public static void weeklyResult()
         {
-            
+            foreach(var i in All_Data_weekly)
+            {
+                foreach (var j in i)
+                {
+                    if (!All_program_weekly.ContainsKey(j.Key))
+                    {
+                        All_program_weekly.Add(j.Key, j.Value);
+                    }
+                    else
+                    {
+                        All_program_weekly[j.Key] += (int)j.Value;
+                    }
+                    BasicTools.CreateChart(All_Program, "Weekly-" + t + ".png");
+                }
+            }
         }
 
         public static void monthlyResult()
         {
-
+            foreach (var i in All_Data_monthly)
+            {
+                foreach (var j in i)
+                {
+                    if (!All_program_monthly.ContainsKey(j.Key))
+                    {
+                        All_program_monthly.Add(j.Key, j.Value);
+                    }
+                    else
+                    {
+                        All_program_monthly[j.Key] += (int)j.Value;
+                    }
+                    BasicTools.CreateChart(All_Program, "Monthly-" + t + ".png");
+                }
+            }
         }
 
         public static void hideResult()
