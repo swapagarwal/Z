@@ -100,7 +100,7 @@ namespace Z
         {
             Usage.CurrentApplication();
             UsageCounter++;
-            if (UsageCounter == 30)
+            if (UsageCounter == 10)
             {
                 Usage.displayResult();
                 UsageCounter = 0;

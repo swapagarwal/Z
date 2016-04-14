@@ -14,7 +14,7 @@ namespace Z
         static string name = "";
         static string text = "";
         static int duration = 0;
-        static int queueSize = 10;
+        static int queueSize = 20;
         static int daily = 0;
         static int weekly = 0;
         static Dictionary<string, int> All_Program = new Dictionary<string, int>();
@@ -126,18 +126,35 @@ namespace Z
         public static void showPrediction()
         {
             Prediction_Data = new Dictionary<string, int>();
-            double val = 0;
+            Dictionary<string, int> totalData = new Dictionary<string, int>();
+            double val = queueSize+2;
             foreach (var i in All_Data)
             {
-                val++;
+                val--;
                 foreach (var j in i)
                 {
                     if (!Prediction_Data.ContainsKey(j.Key))
-                        Prediction_Data.Add(j.Key, j.Value);
+                    {
+                        Prediction_Data.Add(j.Key, (int)(j.Value*Math.Log10(val)));
+                        totalData.Add(j.Key, j.Value);
+                    }
                     else
-                        Prediction_Data[j.Key] += (int)(((double)j.Value)/val);
-                        //Prediction_Data[j.Key] += j.Value;
+                    {
+                        Prediction_Data[j.Key] += (int)(j.Value* Math.Log(val));
+                        totalData[j.Key] += (int)j.Value;
+                    }
+                        
                 }
+            }
+            
+            foreach(var i in totalData)
+            {
+                if (totalData[i.Key] > 0)
+                {
+                    Prediction_Data[i.Key]/=totalData[i.Key];
+                    //Console.WriteLine(i.Key + "   " + i.Value);
+                }
+                
             }
             Console.WriteLine("Number of ELement in prediction data  " + Prediction_Data.Count);
             BasicTools.CreateChart(Prediction_Data,"prediction" + t + ".png");
