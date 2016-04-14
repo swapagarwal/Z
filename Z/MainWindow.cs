@@ -102,7 +102,7 @@ namespace Z
             UsageCounter++;
             if (UsageCounter == 10)
             {
-                Usage.displayResult();
+                Usage.dailyResult();
                 UsageCounter = 0;
             }
         }

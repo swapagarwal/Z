@@ -15,7 +15,7 @@ namespace Z
         static string text = "";
         static int duration = 0;
         static int queueSize = 20;
-        static int daily = 0;
+        static int monthly = 0;
         static int weekly = 0;
         static Dictionary<string, int> All_Program = new Dictionary<string, int>();
         static Queue<Dictionary<string, int>> All_Data = new Queue<Dictionary<string, int>>();
@@ -24,7 +24,7 @@ namespace Z
         static Dictionary<string, int> Prediction_Data = new Dictionary<string, int>();
         static Dictionary<string, int> fileData = new Dictionary<string, int>();
         static string FileName = "usageData.txt";
-        static string ImageName = "Hourly-";
+        static string ImageName = "Daily-";
         static string t = "";
 
         public static void CurrentApplication()
@@ -62,7 +62,7 @@ namespace Z
             }
         }
 
-        public static void displayResult()
+        public static void dailyResult()
         {
             //display.Show();
             if (!All_Program.ContainsKey(name))
@@ -79,11 +79,11 @@ namespace Z
             {
                 All_Data.Dequeue();
             }
-            if(All_Data_Daily.Count == queueSize * 24)
+            if(All_Data_Daily.Count == queueSize * 7)
             {
                 All_Data_Daily.Dequeue();
             }
-            if(All_Data_weekly.Count== queueSize * 168)
+            if(All_Data_weekly.Count== queueSize * 30)
             {
                 All_Data_weekly.Dequeue();
             }
@@ -93,27 +93,27 @@ namespace Z
             t = DateTime.Now.ToFileTime().ToString();
             BasicTools.CreateChart(All_Program, ImageName + t +".png");
             showPrediction();
-            daily++;
+            monthly++;
             weekly++;
-            if (daily == 24)
-            {
-                dailyResult();
-                daily = 0;
-            }
-            if(weekly == 168)
+            if (weekly == 7)
             {
                 weeklyResult();
                 weekly = 0;
             }
+            if(monthly == 7)
+            {
+                monthlyResult();
+                monthly = 0;
+            }
             All_Program = new Dictionary<string, int>();
         }
 
-        public static void dailyResult()
+        public static void weeklyResult()
         {
             
         }
 
-        public static void weeklyResult()
+        public static void monthlyResult()
         {
 
         }
