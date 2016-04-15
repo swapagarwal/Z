@@ -291,19 +291,19 @@ namespace Z
 
                 ApplicationLastUsedCount.TryGetValue(ApplicationLastUsedKey, out ab);
                 TotalLastUsedCount.TryGetValue(Item.LastUsedApplication, out b);
-                probability *= (b == 0) ? (1.0) : (ab / b);
+                probability *= (b == 0) ? (0.001) : (ab / b);
 
                 ApplicationJointCount.TryGetValue(ApplicationJointKey, out ab);
                 TotalJointCount.TryGetValue(Item.LastUsedApplication + ", " + Item.SecondLastUsedApplication, out b);
-                probability *= (b == 0) ? (1.0) : (ab / b);
+                probability *= (b == 0) ? (0.001) : (ab / b);
 
                 ApplicationNetworkCount.TryGetValue(ApplicationNetworkKey, out ab);
                 TotalNetworkCount.TryGetValue(Item.NetworkStatus, out b);
-                probability *= (b == 0) ? (1.0) : (ab / b);
+                probability *= (b == 0) ? (0.001) : (ab / b);
 
                 ApplicationPluggedInCount.TryGetValue(ApplicationPluggedInKey, out ab);
                 TotalPluggedInCount.TryGetValue(Item.PluggedInStatus, out b);
-                probability *= (b == 0) ? (1.0) : (ab / b);
+                probability *= (b == 0) ? (0.001) : (ab / b);
 
                 CandidateApplications.Add(ApplicationName, probability);
             }

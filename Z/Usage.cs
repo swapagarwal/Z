@@ -87,6 +87,10 @@ namespace Z
         public static void dailyResult()
         {
             //display.Show();
+            if (name == null)
+            {
+                return;
+            }
             if (!All_Program.ContainsKey(name))
                 All_Program.Add(name, duration);
             else

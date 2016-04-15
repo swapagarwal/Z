@@ -106,16 +106,24 @@ namespace Z
                 for (int i = 0; i < DefaultDevice.AudioSessionManager.Sessions.Count; i++)
                 {
                     var Session = DefaultDevice.AudioSessionManager.Sessions[i];
-                    Process ApplicationProcess = Process.GetProcessById((int)Session.GetProcessID);
-                    string ApplicationName = ApplicationProcess.ProcessName;
 
-                    foreach (ApplicationVolume Application in Data.Applications)
+                    try
                     {
-                        if (ApplicationName == Application.ApplicationName)
+                        Process ApplicationProcess = Process.GetProcessById((int)Session.GetProcessID);
+                        string ApplicationName = ApplicationProcess.ProcessName;
+
+                        foreach (ApplicationVolume Application in Data.Applications)
                         {
-                            Session.SimpleAudioVolume.Volume = (float)Application.Volume;
-                            break;
+                            if (ApplicationName == Application.ApplicationName)
+                            {
+                                Session.SimpleAudioVolume.Volume = (float)Application.Volume;
+                                break;
+                            }
                         }
+                    }
+                    catch(Exception ex)
+                    {
+                        Debug.WriteLine(ex.Message);
                     }
                 }
             }
